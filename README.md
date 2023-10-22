@@ -2,7 +2,7 @@
 
 ## 引言
 
-![wechat_screenshot](README.assets/wechat_screenshot.jpg)
+![structure.jpg](https://github.com/Radioheading/RISC-V-SIMU/blob/main/structure.jpg?raw=true)
 
 
 ## 项目说明
