@@ -5,6 +5,7 @@
 `define FUNCT_3       14:12
 `define RS_1          19:15
 `define RS_2          24:20
+`define RD            11:7
 
 `define R_type        7'b0110011
 `define I_type        7'b0010011
@@ -54,5 +55,4 @@
 `define    SRA      6'd34 
 `define    OR       6'd35 
 `define    AND      6'd36 
-
-`define 
+`define    NULL     6'd37

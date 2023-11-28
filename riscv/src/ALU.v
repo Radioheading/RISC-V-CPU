@@ -1,4 +1,4 @@
-`include "const.v"
+`include "const_def.v"
 
 // change: jalr auipc calculation are done in ALU
 
@@ -8,13 +8,16 @@ module ALU (
     input [31:0] rs2,
     input [31:0] imm,
     input [6:0]  opcode,
+    input [4:0] calc_name,
 
     output reg [31:0]  A,
     output reg [31:0]  jump_pc,
-    output reg         should_jump
+    output reg         should_jump,
+    output reg [4:0]   finish_name // broadcast to LSB & RS
 );
 
 always @(*) begin
+    assign finish_name = calc_namel;
     should_jump = 0;
     result = 0;
     jump_pc = pc;
