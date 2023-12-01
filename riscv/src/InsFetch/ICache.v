@@ -1,8 +1,7 @@
 `include "const_def.v"
 
-`define IDLE        2'b00
-`define BUSY        2'b01
-`define RESET       2'b10
+`define IDLE        1'b1
+`define BUSY        1'b0
 `define CACHE_RANGE 10:2
 `define CACHE_SIZE  512
 `define TAG_RANGE   31:11
@@ -51,8 +50,6 @@ always @(posedge clk) begin
     end
     else if (fetch_enable) begin
         if (cache_hit) begin
-            // cache_valid <= 1'b1;
-            // cache_data  <= data[index];
             // mem_enable  <= 1'b0;
         end
         else if (state == `BUSY) begin
