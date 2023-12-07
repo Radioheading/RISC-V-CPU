@@ -40,15 +40,15 @@ wire [`RS_RANGE] first_empty;
 wire [`RS_RANGE] first_ready;
 
 // internal data
-reg        busy[`RS_SIZE];
-reg [31:0] pc[`RS_SIZE];
-reg [31:0] imm[`RS_SIZE];
-reg [31:0] Vi[`RS_SIZE];
-reg [31:0] Vj[`RS_SIZE];
-reg [4:0]  Qi[`RS_SIZE];
-reg [4:0]  Qj[`RS_SIZE];
-reg [4:0]  rd[`RS_SIZE];
-reg [6:0]  op[`RS_SIZE];
+reg        busy[`RS_ARR];
+reg [31:0] pc[`RS_ARR];
+reg [31:0] imm[`RS_ARR];
+reg [31:0] Vi[`RS_ARR];
+reg [31:0] Vj[`RS_ARR];
+reg [4:0]  Qi[`RS_ARR];
+reg [4:0]  Qj[`RS_ARR];
+reg [4:0]  rd[`RS_ARR];
+reg [6:0]  op[`RS_ARR];
 
 /* warning: ROB id must be 1-based, or there'll be 
  * conflict with the ID 0 in terms of Qi and Qj

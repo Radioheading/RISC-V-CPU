@@ -35,7 +35,7 @@ module LoadStoreBuffer (
     input wire [6:0]  dispatch_op,
     input wire [31:0] dispatch_Vi,
     input wire [31:0] dispatch_Vj,
-    output reg        lsb_full
+    output reg        lsb_full,
 
     // port with RS
     output reg        lsb_valid,
@@ -55,13 +55,13 @@ assign full = (next_head == tail);
 assign lsb_full = full;
 
 // data of load-store buffer
-reg [6:0] op[`LSB_SIZE];
-reg [31:0] imm[`LSB_SIZE];
-reg [4:0]  Qi[`LSB_SIZE];
-reg [4:0]  Qj[`LSB_SIZE];
-reg [4:0]  rd[`LSB_SIZE];
-reg [31:0] Vi[`LSB_SIZE];
-reg [31:0] Vj[`LSB_SIZE];
+reg [6:0]  op[`LSB_ARR];
+reg [31:0] imm[`LSB_ARR];
+reg [4:0]  Qi[`LSB_ARR];
+reg [4:0]  Qj[`LSB_ARR];
+reg [4:0]  rd[`LSB_ARR];
+reg [31:0] Vi[`LSB_ARR];
+reg [31:0] Vj[`LSB_ARR];
 
 integer i;
 
