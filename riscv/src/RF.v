@@ -50,7 +50,7 @@ always @(posedge clk) begin
             end
         end
         else begin
-            if (dispatch_enable) begin
+            if (dispatch_enable && dispatch_name) begin
                 dependency[dispatch_name] = dispatch_rename;
             end
             if (rob_valid && dest) begin

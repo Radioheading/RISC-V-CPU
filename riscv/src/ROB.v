@@ -30,14 +30,15 @@ module ReOrderBuffer (
 
     // port with dispatcher
     input wire         dispatch_valid,
-    input wire [31:0]  dispatch_pc,
-    input wire [4:0]   dispatch_rd,
-    input wire [6:0]   dispatch_op,
+    input wire  [31:0] dispatch_pc,
+    input wire  [4:0]  dispatch_rd,
+    input wire  [6:0]  dispatch_op,
     input wire         dispatch_jump_choice,
-    input wire [4:0]   dispatch_Qi,
-    input wire [4:0]   dispatch_Qj,
-    input wire         Qi_enable,
-    input wire         Qj_enable,
+    input wire  [4:0]  dispatch_Qi,
+    input wire  [4:0]  dispatch_Qj,
+
+    input wire  [4:0]  Qi_check,
+    input wire  [4:0]  Qj_check,
 
     output reg  [4:0]  rename_rd,
     output reg         Qi_valid,
@@ -73,6 +74,13 @@ reg        is_jump[`ROB_ARR];
 reg [31:0] pc[`ROB_ARR];
 reg [31:0] jump_pc[`ROB_ARR];
 
+assign rename_rd = next_tail;
+assign Qi_valid  = ready[Qi_check];
+assign Qj_valid  = ready[Qj_check];
+assign Vi_value  = res[Qi_check];
+assign Vj_value  = res[Qj_check];
+assign ls_commit = op[next_head] >= `LB && op[next_head] <= `SW;
+assign ls_rob_id = next_head;
 
 integer i;
 
@@ -140,10 +148,22 @@ always @(posedge clk) begin
                 predictor_update    <= now_choice[next_head];
                 predictor_enable    <= 1;
             end
+            else begin
+                predictor_enable    <= 0;
+            end
             if (prev_choice[next_head] != now_choice[next_head]) begin
                 wrong_commit <= 1;
                 true_pc      <= now_choice[next_head] ? jump_pc[next_head] : pc[next_head];
             end
+
+            commit_valid      <= 1;
+            commit_rd         <= rd[next_head];
+            commit_res        <= res[next_head];
+            commit_dependency <= next_head;
+        end
+        else begin
+            commit_valid      <= 0;
+            predictor_enable  <= 0;
         end
     end
 end

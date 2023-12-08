@@ -2,8 +2,6 @@
 
 module Parser (
     input wire [31:0] inst,
-    input wire [6:0]  inst_type,
-    output reg        is_branch,
     output reg        is_j_type,
     output reg        is_load_store,
     output reg [4:0]  rd,
@@ -13,8 +11,9 @@ module Parser (
     output reg [6:0]  op
 );
 
-wire [2:0] funct_3 = inst[`FUNCT_3];
-wire [6:0] r_judge = inst[31:25];
+wire       inst_type = inst[6:0];
+wire [2:0] funct_3   = inst[`FUNCT_3];
+wire [6:0] r_judge   = inst[31:25];
 
 always @(*) begin
     is_load_store = (inst_type == `L_type || inst_type == `S_type);
