@@ -7,7 +7,7 @@ module Dispatcher (
 
     input wire        wrong_commit,
     // port with parser
-    output reg        parse_inst,
+    output reg [31:0] parse_inst,
     input wire        is_jump,
     input wire        is_ls,
     input wire [4:0]  rd,
@@ -70,6 +70,7 @@ module Dispatcher (
     input wire        if_valid,
     input wire [31:0] if_inst,
     input wire [31:0] if_pc,
+    output reg        issue_stall,
     // when ALU has result
     input wire        alu_valid,
     input wire [31:0] alu_res,
@@ -80,6 +81,7 @@ module Dispatcher (
     input wire [4:0]  lsb_rob_id
 );
 wire    part_full = rob_full || rs_full || lsb_full;
+assign issue_stall = part_full;
 assign parse_inst = if_inst;
 assign to_rf_rs1  = rs1;
 assign to_rf_rs2  = rs2;

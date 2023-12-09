@@ -21,7 +21,6 @@ module LoadStoreBuffer (
     output reg        load_store_enable,
     output reg [31:0] load_store_addr,
     output reg [31:0] load_store_data,
-    output reg [2:0]  load_store_size,
     output reg        load_or_store,
     output reg [4:0]  load_store_op,
 
@@ -73,7 +72,6 @@ always @(posedge clk) begin
         load_store_enable <= 0;
         load_store_addr   <= 0;
         load_store_data   <= 0;
-        load_store_size   <= 0;
         load_or_store     <= 0;
         load_store_op     <= 0;
         lsb_valid         <= 0;
@@ -138,15 +136,6 @@ always @(posedge clk) begin
                 load_or_store     <= op[next_head] >= `LB && op[next_head] <= `LHU;
                 lsb_rob_id        <= rob_commit_id;
                 state             <= (op[next_head] >= `LB && op[next_head] <= `LHU) ? 1 : 0;
-
-                case (op[next_head])
-                `LB, LBU : load_store_size <= 3'b001;
-                `LH, LHU : load_store_size <= 3'b010;
-                `LW      : load_store_size <= 3'b100;
-                `SB      : load_store_size <= 3'b001;
-                `SH      : load_store_size <= 3'b010;
-                `SW      : load_store_size <= 3'b100;
-                endcase
             end
         end
         `LOAD: begin

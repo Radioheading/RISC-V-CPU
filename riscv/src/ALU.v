@@ -8,8 +8,9 @@ module ALU (
     input [31:0] rs2,
     input [31:0] imm,
     input [6:0]  opcode,
-    input [4:0] calc_name,
+    input [4:0]  calc_name,
 
+    output reg         alu_valid,
     output reg [31:0]  A,
     output reg [31:0]  jump_pc,
     output reg         should_jump,
@@ -17,11 +18,13 @@ module ALU (
 );
 
 always @(*) begin
-    assign finish_name = calc_namel;
+    finish_name = calc_name;
+    alu_valid = (opcode > 0);
     should_jump = 0;
     result = 0;
     jump_pc = pc;
     
+
     case (opcode)
         `LUI_type: begin
             result = imm;

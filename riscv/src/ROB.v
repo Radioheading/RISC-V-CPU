@@ -1,6 +1,9 @@
 `include "const_def.v"
 
 module ReOrderBuffer (
+    input wire         clk,
+    input wire         rst,
+    input wire         rdy,
     // port with LSB
     input  wire        lsb_valid,
     input  wire [31:0] lsb_res,
@@ -22,11 +25,6 @@ module ReOrderBuffer (
     input wire [4:0]   alu_rob_id,
     input wire         alu_jump_choice,
     input wire [31:0]  alu_pc,
-    
-    // with LSB
-    input wire         lsb_valid,
-    input wire [31:0]  lsb_res,
-    input wire [4:0]   lsb_rob_id,
 
     // port with dispatcher
     input wire         dispatch_valid,
@@ -39,7 +37,6 @@ module ReOrderBuffer (
 
     input wire  [4:0]  Qi_check,
     input wire  [4:0]  Qj_check,
-
     output reg  [4:0]  rename_rd,
     output reg         Qi_valid,
     output reg         Qj_valid,

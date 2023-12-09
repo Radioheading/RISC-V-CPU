@@ -18,7 +18,7 @@ module Predictor (
     // port with ROB
     input wire        ROB_valid,
     input wire [31:0] commit_pc,
-    input wire real_result // the real result of prev branch
+    input wire        real_result // the real result of prev branch
 );
 
 reg [1:0] judger[127:0];

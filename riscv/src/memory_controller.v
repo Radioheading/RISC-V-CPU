@@ -14,7 +14,6 @@ module MemController (
     input wire clk,
     input wire rst,
     input wire rdy,
-    input wire wrong_jump,
 
     // port with ram
     input wire [7:0]  byte_in,
@@ -48,10 +47,10 @@ always @(posedge clk) begin
     if (op == `LW) begin
         lsb_data_size <= 3'b100;
     end
-    else if (op == `LH) begin
+    else if (op == `LH || op == `LHU) begin
         lsb_data_size <= 3'b010;
     end
-    else if (op == `LB) begin
+    else if (op == `LB || OP == `LBU) begin
         lsb_data_size <= 3'b001;
     end
     else if (op == `SW) begin

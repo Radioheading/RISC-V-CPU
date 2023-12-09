@@ -16,6 +16,7 @@ module ReservationStation (
     output reg [31:0] Vi_alu,
     output reg [31:0] Vj_alu,
     output reg [31:0] imm_alu,
+    output reg [31:0] alu_rd,
     output reg [31:0] pc_alu, // for JAL, JALR, AUIPC
 
     // port with LSB, for memory alias
@@ -99,7 +100,7 @@ always @(posedge clk) begin
         Vi_alu  <= 0;
         Vj_alu  <= 0;
         imm_alu <= 0;
-        alu_res <= 0;
+        alu_rd  <= 0;
         pc_alu  <= 0;
     end
     else if (rdy) begin
@@ -133,7 +134,7 @@ always @(posedge clk) begin
             Vj_alu            <= Vj[first_ready];
             imm_alu           <= imm[first_ready];
             pc_alu            <= pc[first_ready];
-            alu_res           <= rd[first_ready];
+            alu_rd            <= rd[first_ready];
             busy[first_ready] <= 0;
         end
         else begin // can't execute
@@ -142,7 +143,7 @@ always @(posedge clk) begin
             Vj_alu  <= 0;
             imm_alu <= 0;
             pc_alu  <= 0;
-            alu_res <= 0;
+            alu_rd <= 0;
         end
         if (first_empty < `RS_SIZE && dispatch_valid) begin // can dispatch
             busy[first_empty] <= 1;
