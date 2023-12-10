@@ -1,18 +1,5 @@
 // RISCV32I CPU top module
 // port modification allowed for debugging purposes
-`include "./memory_controller.v"
-`include "./ROB.v"
-`include "./RF.v"
-`include "./InsFetch/InsFetcher.v"
-`include "./InsFetch/ICache.v"
-`include "./InsFetch/Predictor.v"
-`include "./InsDecode/Parser.v"
-`include "./InsDecode/Dispatcher.v"
-`include "./Execute/ALU.v"
-`include "./Execute/RS.v"
-`include "./Execute/LSB.v"
-
-
 module cpu(
   input  wire                 clk_in,			// system clock signal
   input  wire                 rst_in,			// reset signal
@@ -25,7 +12,7 @@ module cpu(
 	
 	input  wire                 io_buffer_full, // 1 if uart buffer is full
 	
-	output wire [31:0]			dbgreg_dout		// cpu register output (debugging demo)
+	output wire [31:0]			    dbgreg_dout		// cpu register output (debugging demo)
 );
 
 // implementation goes here
@@ -42,7 +29,7 @@ module cpu(
 
 // general ROB
 wire        wrong_commit;
-wire        reset_pc;
+wire [31:0] reset_pc;
 
 // common data bus
 wire        alu_valid;
@@ -75,8 +62,8 @@ wire [31:0] mc_to_lsb_read_data;
 
 // predictor & IF
 wire [31:0] if_predictor_pc;
-wire        if_predictor_inst;
-wire        predictor_suggest_pc;
+wire [31:0] if_predictor_inst;
+wire [31:0] predictor_suggest_pc;
 wire        predictor_suggest_res;
 
 // predictor & ROB
@@ -109,13 +96,13 @@ wire [4:0]  parser_rs2;
 
 // dispatcher & ROB
 wire        rob_full;
-wire        rob_rename_rd;
+wire [4:0]  rob_rename_rd;
 wire        rob_Qi_valid;
 wire        rob_Qj_valid;
 wire [31:0] rob_Vi_value;
 wire [31:0] rob_Vj_value;
-wire        rob_Qi_check;
-wire        rob_Qj_check;
+wire [4:0]  rob_Qi_check;
+wire [4:0]  rob_Qj_check;
 wire        to_rob_valid;
 wire [31:0] to_rob_imm;
 wire [31:0] to_rob_pc;
@@ -185,7 +172,7 @@ MemController mem_controller(
   .byte_in(mem_din),
   .io_buffer_full(io_buffer_full),
   .ram_enable(ram_enable),
-  .lw_type(lsb_r_or_w),
+  .lw_type(mem_wr),
   .addr(mem_a),
   .byte_out(mem_dout),
   .fetch_enable(fetch_enable),
@@ -222,7 +209,7 @@ ICache i_cache(
   .mem_valid(i_cache_valid),
   .mem_enable(fetch_enable),
   .inst_addr(fetch_inst_addr),
-  .fet_enable(IF_enable),
+  .fetch_enable(IF_enable),
   .pc(IF_pc),
   .hit(IF_hit),
   .hit_data(IF_hit_data)
@@ -252,9 +239,6 @@ InsFetcher ins_fetcher(
 );
 
 Parser parser(
-  .clk(clk_in),
-  .rst(rst_in),
-  .rdy(rdy_in),
   .inst(parser_inst),
   .is_j_type(parser_is_jump),
   .is_load_store(parser_is_ls),
@@ -420,12 +404,15 @@ ReservationStation rs (
 );
 
 LoadStoreBuffer load_store_buffer (
+  .clk(clk_in),
+  .rst(rst_in),
+  .rdy(rdy_in),
   .alu_valid(alu_valid),
   .alu_res(alu_result),
   .alu_rob_id(alu_rob_id),
   .wrong_commit(wrong_commit),
   .rob_valid(load_store_commit),
-  .rob_id(load_store_rob_id),
+  .rob_commit_id(load_store_rob_id),
   .mem_valid(mc_to_lsb_valid),
   .mem_res(mc_to_lsb_read_data),
   .load_store_enable(lsb_enable),

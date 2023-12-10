@@ -50,7 +50,7 @@ always @(posedge clk) begin
     else if (op == `LH || op == `LHU) begin
         lsb_data_size <= 3'b010;
     end
-    else if (op == `LB || OP == `LBU) begin
+    else if (op == `LB || op == `LBU) begin
         lsb_data_size <= 3'b001;
     end
     else if (op == `SW) begin
@@ -68,7 +68,7 @@ always @(posedge clk) begin
         i_cache_valid <= 1'b0;
         cur_byte      <= 3'b000;
         ram_enable    <= 1'b0;
-        lw_type       <= 1'b1;
+        lw_type       <= 1'b0;
         addr          <= 32'b0;
         byte_out      <= 8'b0;
         read_data     <= 32'b0;
@@ -89,7 +89,7 @@ always @(posedge clk) begin
                     if (lsb_r_or_w) begin
                         // read
                         ram_enable <= 1'b1;
-                        lw_type    <= 1'b1;
+                        lw_type    <= 1'b0;
                         byte_out    <= 32'b0;
                         addr       <= lsb_addr;
                         state      <= `LOAD;
@@ -97,7 +97,7 @@ always @(posedge clk) begin
                     else begin
                         // write
                         ram_enable <= 1'b0; // we can't read immediately
-                        lw_type    <= 1'b0;
+                        lw_type    <= 1'b1;
                         byte_out    <= 32'b0;
                         addr       <= lsb_addr;
                         state      <= `STORE;
@@ -106,30 +106,36 @@ always @(posedge clk) begin
                 else if (fetch_enable) begin
                     cur_byte   <= 3'b000;
                     ram_enable <= 1'b1;
-                    lw_type    <= 1'b1;
+                    lw_type    <= 1'b0;
                     byte_out    <= 32'b0;
                     addr       <= inst_addr;
                     state      <= `FETCH;
                 end
                 else begin
                     ram_enable <= 1'b0;
-                    lw_type    <= 1'b1;
-                    byte_out    <= 32'b0;
+                    lw_type    <= 1'b0;
+                    byte_out   <= 32'b0;
                     addr       <= 32'b0;
                     state      <= `IDLE;
-                    cur_byte  <= 3'b000;
+                    cur_byte   <= 3'b000;
                 end
             end
             else if (state == `STORE && !io_buffer_full) begin
-                lw_type      <= 1'b0;
-                byte_out      <= lsb_data[8 * cur_byte + 7: 8 * cur_byte];
+                lw_type        <= 1'b1;
+                case (cur_byte)
+                    3'b000: byte_out <= lsb_data[7:0];
+                    3'b001: byte_out <= lsb_data[15:8];
+                    3'b010: byte_out <= lsb_data[23:16];
+                    3'b011: byte_out <= lsb_data[31:24];
+                    3'b100: byte_out <= 8'b0;
+                endcase
 
                 if (cur_byte == lsb_data_size) begin
                     cur_byte   <= 3'b000;
                     state      <= `STALL;
                     lsb_valid  <= 1'b1;
                     ram_enable <= 1'b0;
-                    lw_type    <= 1'b1;
+                    lw_type    <= 1'b0;
                     addr       <= 32'b0;
                 end
                 else begin
@@ -139,17 +145,20 @@ always @(posedge clk) begin
                 end
             end
             else if (state == `LOAD) begin
-                lw_type      <= 1'b1;
-                if (cur_byte > 0) begin
-                    read_data[8 * cur_byte - 1: 8 * (cur_byte - 1)] <= byte_in;
-                end
+                lw_type      <= 1'b0;
+                case (cur_byte)
+                    3'b001: read_data[7:0]   <= byte_in;
+                    3'b010: read_data[15:8]  <= byte_in;
+                    3'b011: read_data[23:16] <= byte_in;
+                    3'b100: read_data[31:24] <= byte_in;
+                endcase
 
                 if (cur_byte == lsb_data_size) begin
                     cur_byte   <= 3'b000;
                     state      <= `STALL;
                     lsb_valid  <= 1'b1;
                     ram_enable <= 1'b0;
-                    lw_type    <= 1'b1;
+                    lw_type    <= 1'b0;
                     addr       <= 32'b0;
                     if (op == `LH) begin
                         read_data[31:16] <= {16{read_data[15]}};
@@ -165,9 +174,12 @@ always @(posedge clk) begin
                 end
             end   
             else if (state == `FETCH) begin
-                if (cur_byte > 0) begin
-                    i_cache_data[8 * cur_byte - 1: 8 * (cur_byte - 1)] <= byte_in;
-                end
+                case (cur_byte)
+                    3'b001: i_cache_data[7:0]   <= byte_in;
+                    3'b010: i_cache_data[15:8]  <= byte_in;
+                    3'b011: i_cache_data[23:16] <= byte_in;
+                    3'b100: i_cache_data[31:24] <= byte_in;
+                endcase
 
                 if (cur_byte == 4) begin
                     cur_byte      <= 3'b000;

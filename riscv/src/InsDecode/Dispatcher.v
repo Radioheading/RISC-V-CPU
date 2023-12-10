@@ -7,7 +7,7 @@ module Dispatcher (
 
     input wire        wrong_commit,
     // port with parser
-    output reg [31:0] parse_inst,
+    output wire[31:0] parse_inst,
     input wire        is_jump,
     input wire        is_ls,
     input wire [4:0]  rd,
@@ -17,13 +17,13 @@ module Dispatcher (
     input wire [4:0]  rs2,
     // port with ROB
     input wire        rob_full,
-    input wire        rename_rd,
+    input wire [4:0]  rename_rd,
     input wire        Qi_valid,
     input wire        Qj_valid,
     input wire [31:0] Vi_value,
     input wire [31:0] Vj_value,
-    output reg        Qi_check,
-    output reg        Qj_check,
+    output wire[4:0]  Qi_check,
+    output wire[4:0]  Qj_check,
     
     output reg        to_rob_valid,
     output reg [31:0] to_rob_imm,
@@ -59,8 +59,8 @@ module Dispatcher (
     output reg        to_rf_valid,
     output reg [4:0]  to_rf_name,
     output reg [4:0]  to_rf_rename,
-    output reg [4:0]  to_rf_rs1,
-    output reg [4:0]  to_rf_rs2,
+    output wire[4:0]  to_rf_rs1,
+    output wire[4:0]  to_rf_rs2,
     input wire [4:0]  to_rf_Qi,
     input wire [4:0]  to_rf_Qj,
     input wire [31:0] to_rf_Vi,
@@ -70,7 +70,7 @@ module Dispatcher (
     input wire        if_valid,
     input wire [31:0] if_inst,
     input wire [31:0] if_pc,
-    output reg        issue_stall,
+    output wire       issue_stall,
     // when ALU has result
     input wire        alu_valid,
     input wire [31:0] alu_res,
@@ -80,13 +80,13 @@ module Dispatcher (
     input wire [31:0] lsb_res,
     input wire [4:0]  lsb_rob_id
 );
-wire    part_full = rob_full || rs_full || lsb_full;
+wire   part_full   = rob_full || rs_full || lsb_full;
 assign issue_stall = part_full;
-assign parse_inst = if_inst;
-assign to_rf_rs1  = rs1;
-assign to_rf_rs2  = rs2;
-assign Qi_check   = to_rf_Qi;
-assign Qj_check   = to_rf_Qj;
+assign parse_inst  = if_inst;
+assign to_rf_rs1   = rs1;
+assign to_rf_rs2   = rs2;
+assign Qi_check    = to_rf_Qi;
+assign Qj_check    = to_rf_Qj;
 
 always @(posedge clk) begin
     if (rst || wrong_commit) begin
@@ -120,13 +120,11 @@ always @(posedge clk) begin
         to_rf_valid        <= 0;
         to_rf_name         <= 0;
         to_rf_rename       <= 0;
-        to_rf_rs1          <= 0;
-        to_rf_rs2          <= 0;
     end
     else if (rdy) begin
         to_lsb_valid       <= 0;
         to_rs_valid        <= 0;
-        if (if_valid && ~is_full) begin
+        if (if_valid && ~part_full) begin
             to_rf_valid        <= 1;
             to_rf_name         <= rd;
             to_rf_rename       <= rename_rd;

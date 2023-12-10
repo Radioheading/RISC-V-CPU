@@ -16,7 +16,7 @@ module ReservationStation (
     output reg [31:0] Vi_alu,
     output reg [31:0] Vj_alu,
     output reg [31:0] imm_alu,
-    output reg [31:0] alu_rd,
+    output reg [4:0]  alu_rd,
     output reg [31:0] pc_alu, // for JAL, JALR, AUIPC
 
     // port with LSB, for memory alias

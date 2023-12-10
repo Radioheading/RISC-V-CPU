@@ -8,13 +8,13 @@ module ReOrderBuffer (
     input  wire        lsb_valid,
     input  wire [31:0] lsb_res,
     input  wire [4:0]  lsb_rob_id,
-    output reg         ls_commit,
-    output reg  [4:0]  ls_rob_id,
+    output wire        ls_commit,
+    output wire [4:0]  ls_rob_id,
 
     // common data bus
     output reg         wrong_commit,
     output reg  [31:0] true_pc,
-    output reg         rob_full,
+    output wire        rob_full,
     output reg         predictor_enable,
     output reg         predictor_update,
     output reg  [31:0] predictor_update_pc,
@@ -37,11 +37,11 @@ module ReOrderBuffer (
 
     input wire  [4:0]  Qi_check,
     input wire  [4:0]  Qj_check,
-    output reg  [4:0]  rename_rd,
-    output reg         Qi_valid,
-    output reg         Qj_valid,
-    output reg  [31:0] Vi_value,
-    output reg  [31:0] Vj_value,
+    output wire [4:0]  rename_rd,
+    output wire        Qi_valid,
+    output wire        Qj_valid,
+    output wire [31:0] Vi_value,
+    output wire [31:0] Vj_value,
 
     // port with register file, only for commit
     output reg         commit_valid,
@@ -52,7 +52,7 @@ module ReOrderBuffer (
 
 wire             empty, full;
 reg [`ROB_RANGE] head, tail;
-reg [`ROB_RANGE] next_head, next_tail;
+wire [`ROB_RANGE] next_head, next_tail;
 
 assign next_head = head + 1 == `ROB_SIZE ? 1 : head + 1;
 assign next_tail = tail + 1 == `ROB_SIZE ? 1 : tail + 1;
@@ -85,18 +85,11 @@ always @(posedge clk) begin
     if (rst || wrong_commit) begin
         head                <= 0;
         tail                <= 0;
-        ls_commit           <= 0;
-        ls_rob_id           <= 0;
         wrong_commit        <= 0;
         true_pc             <= 0;
         predictor_enable    <= 0;
         predictor_update    <= 0;
         predictor_update_pc <= 0;
-        rename_rd           <= 0;
-        Qi_valid            <= 0;
-        Qj_valid            <= 0;
-        Vi_value            <= 0;
-        Vj_value            <= 0;
         commit_valid        <= 0;
         commit_rd           <= 0;
         commit_res          <= 0;

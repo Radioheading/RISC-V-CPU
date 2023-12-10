@@ -18,20 +18,19 @@ module ICache (
     output reg [31:0] inst_addr,
 
     // port with InsFetch
-    input wire        fet_enable,
+    input wire        fetch_enable,
     input wire [31:0] pc,
     output reg        hit,
     output reg [31:0] hit_data
 
 );
 
-reg [31:0]  data  [CACHE_SIZE - 1:0];
-reg [31:11] tag   [CACHE_SIZE - 1:0];
-reg         valid [CACHE_SIZE - 1:0];
+reg [31:0]  data  [`CACHE_SIZE - 1:0];
+reg [31:11] tag   [`CACHE_SIZE - 1:0];
+reg         valid [`CACHE_SIZE - 1:0];
 reg         state;
 wire [10:2] index = pc[10:2];
-assign      hit = fetch_enable && (tag[index] == pc[`TAG_RANGE]) && valid[index];
-assign      hit_data = data[index];
+wire        cache_hit = fetch_enable && (tag[index] == pc[`TAG_RANGE]) && valid[index];
 integer     i;
 
 always @(posedge clk) begin
@@ -40,7 +39,7 @@ always @(posedge clk) begin
         state         <= `IDLE;
         mem_enable    <= 1'b0;
         inst_addr     <= 32'b0;
-        for (i = 0; i < CACHE_SIZE; i = i + 1) begin
+        for (i = 0; i < `CACHE_SIZE; i = i + 1) begin
             data[i]  <= 32'b0;
             tag[i]   <= 21'b0;
             valid[i] <= 1'b0;
@@ -50,14 +49,16 @@ always @(posedge clk) begin
     end
     else if (fetch_enable) begin
         if (cache_hit) begin
-            // mem_enable  <= 1'b0;
+            mem_enable  <= 1'b0;
+            hit         <= 1'b1;
+            hit_data    <= data[index];
         end
         else if (state == `BUSY) begin
             if (mem_valid) begin
                 state                  <= `IDLE;
                 mem_enable             <= 1'b0;
                 data[inst_addr[10:2]]  <= inst;
-                tag[`TAG_RANGE]        <= inst[`TAG_RANGE];
+                tag[inst_addr[10:2]]   <= inst[`TAG_RANGE];
                 valid[inst_addr[10:2]] <= 1'b1;
             end
         end

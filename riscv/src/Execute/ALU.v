@@ -18,138 +18,140 @@ module ALU (
 );
 
 always @(*) begin
-    assign finish_name = calc_namel;
+    finish_name = calc_name;
+    alu_valid = (opcode > 0);
     should_jump = 0;
-    result = 0;
+    A = 0;
     jump_pc = pc;
     
+
     case (opcode)
-        `LUI_type: begin
-            result = imm;
+        `LUI: begin
+            A = imm;
         end
-        `AUIPC_type: begin
-            result = pc + imm;
+        `AUIPC: begin
+            A = pc + imm;
         
         end
-        `JAL_type: begin
-            result = pc + 4;
+        `JAL: begin
+            A = pc + 4;
             jump_pc = pc + imm;
             should_jump = 1;
         end
-        `JALR_type: begin
-            result = pc + 4;
+        `JALR: begin
+            A = pc + 4;
             jump_pc = (rs1 + imm) & 32'hfffffffe;
             should_jump = 1;
         end
-        `BEQ_type: begin
+        `BEQ: begin
             if (rs1 == rs2) begin
-                result = 1;
+                A = 1;
                 should_jump = 1;
             end
             jump_pc = pc + imm;
         end
-        `BNE_type: begin
+        `BNE: begin
             if (rs1 != rs2) begin
-                result = 1;
+                A = 1;
                 should_jump = 1;
             end
             jump_pc = pc + imm;
         end
-        `BLT_type: begin
+        `BLT: begin
             if ($signed(rs1) < $signed(rs2)) begin
-                result = 1;
+                A = 1;
                 should_jump = 1;
             end
             jump_pc = pc + imm;
         end
-        `BGE_type: begin
+        `BGE: begin
             if ($signed(rs1) >= $signed(rs2)) begin
-                result = 1;
+                A = 1;
                 should_jump = 1;
             end
             jump_pc = pc + imm;
         end
-        `BLTU_type: begin
+        `BLTU: begin
             if (rs1 < rs2) begin
-                result = 1;
+                A = 1;
                 should_jump = 1;
             end
             jump_pc = pc + imm;
         end
-        `BGEU_type: begin
+        `BGEU: begin
             if (rs1 >= rs2) begin
-                result = 1;
+                A = 1;
                 should_jump = 1;
             end
             jump_pc = pc + imm;
         end
-        `ADDI_type: begin
-            result = rs1 + imm;
+        `ADDI: begin
+            A = rs1 + imm;
         end
-        `SLTI_type: begin
+        `SLTI: begin
             if ($signed(rs1) < $signed(imm)) begin
-                result = 1;
+                A = 1;
             end
         end
-        `SLTIU_type: begin
+        `SLTIU: begin
             if (rs1 < imm) begin
-                result = 1;
+                A = 1;
             end
         end
-        `XORI_type : begin
-            result = rs1 ^ imm;
+        `XORI : begin
+            A = rs1 ^ imm;
         end
-        `ORI_type: begin
-            result = rs1 | imm;
+        `ORI: begin
+            A = rs1 | imm;
         end
-        `ANDI_type: begin
-            result = rs1 & imm;
+        `ANDI: begin
+            A = rs1 & imm;
         end
-        `SLLI_type: begin
-            result = rs1 << imm[4:0];
+        `SLLI: begin
+            A = rs1 << imm[4:0];
         end
-        `SRLI_type: begin
-            result = rs1 >> imm[4:0];
+        `SRLI: begin
+            A = rs1 >> imm[4:0];
         end
-        `SRAI_type: begin
-            result = $signed(rs1) >>> imm[4:0];
+        `SRAI: begin
+            A = $signed(rs1) >>> imm[4:0];
         end
-        `ADD_type: begin
-            result = rs1 + rs2;
+        `ADD: begin
+            A = rs1 + rs2;
         end
-        `SUB_type: begin
-            result = rs1 - rs2;
+        `SUB: begin
+            A = rs1 - rs2;
         end
-        `SLL_type: begin
-            result = rs1 << (rs2 & 5'h1f);
+        `SLL: begin
+            A = rs1 << (rs2 & 5'h1f);
         end
-        `SLT_type: begin
+        `SLT: begin
             if ($signed(rs1) < $signed(rs2)) begin
-                result = 1;
+                A = 1;
             end
         end
-        `SLTU_type: begin
+        `SLTU: begin
             if (rs1 < rs2) begin
-                result = 1;
+                A = 1;
             end
         end
-        `XOR_type: begin
-            result = rs1 ^ rs2;
+        `XOR: begin
+            A = rs1 ^ rs2;
         end
-        `SRL_type: begin
-            result = rs1 >> (rs2 & 5'h1f);
+        `SRL: begin
+            A = rs1 >> (rs2 & 5'h1f);
         end
-        `SRA_type: begin
-            result = $signed(rs1) >>> (rs2 & 5'h1f);
+        `SRA: begin
+            A = $signed(rs1) >>> (rs2 & 5'h1f);
         end
-        `OR_type: begin
-            result = rs1 | rs2;
+        `OR: begin
+            A = rs1 | rs2;
         end
-        `AND_type: begin
-            result = rs1 & rs2;
+        `AND: begin
+            A = rs1 & rs2;
         end
         default: begin
-            result = 0;
+            A = 0;
         end
     endcase
 end

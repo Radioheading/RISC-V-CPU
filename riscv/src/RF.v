@@ -6,23 +6,23 @@ module RF (
     input wire rdy,
     
     // port with ROB
-    input wire        rob_valid, // commit now
-    input wire [4:0]  dest,
-    input wire [4:0]  dest_depend, // what if the commit is obsolete
-    input wire [31:0] rob_data,
-    input wire        wrong_commit,
+    input wire         rob_valid, // commit now
+    input wire [4:0]   dest,
+    input wire [4:0]   dest_depend, // what if the commit is obsolete
+    input wire [31:0]  rob_data,
+    input wire         wrong_commit,
 
     // port with dispatcher
-    input wire        dispatch_enable,
-    input wire        dispatch_name,
-    input wire [4:0]  dispatch_rename,
+    input wire         dispatch_enable,
+    input wire  [4:0]  dispatch_name,
+    input wire  [4:0]  dispatch_rename,
     // combinatorial logic
-    input wire [4:0]  dispatch_rs1,
-    input wire [4:0]  dispatch_rs2,
-    output reg [4:0]  dispatch_Qi,
-    output reg [4:0]  dispatch_Qj,
-    output reg [31:0] dispatch_Vi,
-    output reg [31:0] dispatch_Vj
+    input wire  [4:0]  dispatch_rs1,
+    input wire  [4:0]  dispatch_rs2,
+    output wire [4:0]  dispatch_Qi,
+    output wire [4:0]  dispatch_Qj,
+    output wire [31:0] dispatch_Vi,
+    output wire [31:0] dispatch_Vj
 );
 
 // data

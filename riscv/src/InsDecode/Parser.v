@@ -23,7 +23,7 @@ always @(*) begin
     rs1    = inst[`RS_1];
     rs2    = inst[`RS_2];
     imm    = 32'b0;
-    optype = `NULL;
+    op = `NULL;
 
     case (inst_type)
         `R_type: begin

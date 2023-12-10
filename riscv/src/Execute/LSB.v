@@ -5,6 +5,9 @@
 `define STORE 2'b10
 
 module LoadStoreBuffer (
+    input wire        clk,
+    input wire        rst,
+    input wire        rdy,
     // port with ALU
     input wire        alu_valid,
     input wire [31:0] alu_res,
@@ -22,7 +25,7 @@ module LoadStoreBuffer (
     output reg [31:0] load_store_addr,
     output reg [31:0] load_store_data,
     output reg        load_or_store,
-    output reg [4:0]  load_store_op,
+    output reg [6:0]  load_store_op,
 
     // port with dispatcher
     input wire        dispatch_valid,
@@ -34,7 +37,7 @@ module LoadStoreBuffer (
     input wire [6:0]  dispatch_op,
     input wire [31:0] dispatch_Vi,
     input wire [31:0] dispatch_Vj,
-    output reg        lsb_full,
+    output wire       lsb_full,
 
     // port with RS
     output reg        lsb_valid,
@@ -44,7 +47,7 @@ module LoadStoreBuffer (
 
 wire            empty, full;
 reg [`RS_RANGE] head, tail;
-reg [`RS_RANGE] next_head, next_tail;
+wire [`RS_RANGE] next_head, next_tail;
 reg [1:0]       state;
 
 assign next_head = (head + 1) % `LSB_SIZE;
@@ -66,7 +69,7 @@ integer i;
 
 always @(posedge clk) begin
     if (rst || wrong_commit) begin
-        state <= IDLE;
+        state <= `IDLE;
         head  <= 0;
         tail  <= 0;
         load_store_enable <= 0;
@@ -126,7 +129,7 @@ always @(posedge clk) begin
         case (state)
         `IDLE: begin
             lsb_valid <= 0;
-            if (full == 0 && Qi[next_head] == 0 && Qj[next_head] == 0 && ROB_valid && rd[next_head] == rob_commit_id) begin
+            if (full == 0 && Qi[next_head] == 0 && Qj[next_head] == 0 && rob_valid && rd[next_head] == rob_commit_id) begin
                 // access memory
                 head <= next_head;
 
@@ -144,7 +147,7 @@ always @(posedge clk) begin
                 lsb_valid  <= 1;
                 lsb_res    <= mem_res;
                 state      <= `IDLE;
-                lsb_enable <= 0;
+                load_store_enable <= 0;
             end
         end
         `STORE: begin
@@ -153,7 +156,7 @@ always @(posedge clk) begin
                 lsb_valid  <= 1;
                 lsb_res    <= 0;
                 state      <= `IDLE;
-                lsb_enable <= 0;
+                load_store_enable <= 0;
             end
         end
         endcase

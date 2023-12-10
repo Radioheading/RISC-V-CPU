@@ -12,8 +12,8 @@ module Predictor (
     // port with ins_fetcher
     input wire [31:0] if_pc,
     input wire [31:0] if_inst,
-    output wire predict_res,
-    output wire predict_pc,
+    output wire       predict_res,
+    output wire[31:0] predict_pc,
 
     // port with ROB
     input wire        ROB_valid,
@@ -36,7 +36,7 @@ always @(posedge clk) begin
     end
     if (rdy) begin
         if (ROB_valid) begin
-            if (~prev_result) begin
+            if (~real_result) begin
                 if (judger[commit_pc[8:2]] < 2'b11) judger[commit_pc[8:2]] <= judger[commit_pc[8:2]] + 1;
             end
             else begin
