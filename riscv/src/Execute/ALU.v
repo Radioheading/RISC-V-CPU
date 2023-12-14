@@ -23,8 +23,8 @@ always @(*) begin
     should_jump = 0;
     A = 0;
     jump_pc = pc;
-    
-
+    // $display("ALU opcode: %d", opcode);
+    // $display("ALU calc_name: %d", calc_name);
     case (opcode)
         `LUI: begin
             A = imm;

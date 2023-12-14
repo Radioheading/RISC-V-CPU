@@ -42,8 +42,20 @@ module MemController (
 reg [2:0] state;
 reg [2:0] lsb_data_size;
 reg [2:0] cur_byte;
+reg       stall_time; // load or store: 2, fetch: 1
+
+integer clk_count = 0;
+
+integer debug_file;
+
+initial begin
+    debug_file = $fopen("memory_debug.txt");
+end
 
 always @(posedge clk) begin
+    clk_count = clk_count + 1;
+    // $display("MemController clk_count = %d", clk_count);
+    // $display("MemController state = %d", state);
     if (op == `LW) begin
         lsb_data_size <= 3'b100;
     end
@@ -74,40 +86,40 @@ always @(posedge clk) begin
         read_data     <= 32'b0;
     end 
     else begin
-        if (~rdy) begin
-            // wait
-        end
-        else if (io_buffer_full) begin
-            // wait
+        if (~rdy || io_buffer_full) begin
         end
         else begin
             if (state == `IDLE) begin
                 i_cache_valid <= 1'b0;
                 lsb_valid     <= 1'b0;
                 if (lsb_enable) begin
-                    cur_byte <= 3'b000;
+                    cur_byte   <= 3'b000;
+                    stall_time <= 1;
                     if (lsb_r_or_w) begin
+                        // $display("MemController: going to load");
                         // read
                         ram_enable <= 1'b1;
                         lw_type    <= 1'b0;
-                        byte_out    <= 32'b0;
+                        byte_out   <= 32'b0;
                         addr       <= lsb_addr;
                         state      <= `LOAD;
                     end
                     else begin
                         // write
+                        // $display("MemController: going to store");
                         ram_enable <= 1'b0; // we can't read immediately
                         lw_type    <= 1'b1;
-                        byte_out    <= 32'b0;
+                        byte_out   <= 32'b0;
                         addr       <= lsb_addr;
                         state      <= `STORE;
                     end
                 end
                 else if (fetch_enable) begin
+                    stall_time <= 0;
                     cur_byte   <= 3'b000;
                     ram_enable <= 1'b1;
                     lw_type    <= 1'b0;
-                    byte_out    <= 32'b0;
+                    byte_out   <= 32'b0;
                     addr       <= inst_addr;
                     state      <= `FETCH;
                 end
@@ -121,15 +133,24 @@ always @(posedge clk) begin
                 end
             end
             else if (state == `STORE && !io_buffer_full) begin
+                // $display("MemController: STORE");
+                // $display("store data size: %d", lsb_data_size);
+                // $display("cur_byte: %d", cur_byte);
+
                 lw_type        <= 1'b1;
+                if (cur_byte == 0) begin
+                    $fdisplay(debug_file, "clk: %d", clk_count);
+                    $fdisplay(debug_file, "store address: %d, size: %d, value: %d", addr, lsb_data_size, lsb_data);
+                end
                 case (cur_byte)
                     3'b000: byte_out <= lsb_data[7:0];
                     3'b001: byte_out <= lsb_data[15:8];
                     3'b010: byte_out <= lsb_data[23:16];
                     3'b011: byte_out <= lsb_data[31:24];
-                    3'b100: byte_out <= 8'b0;
                 endcase
-
+                // if (0 < cur_byte && cur_byte <= lsb_data_size) begin
+                //     $fdisplay(debug_file, "store data: %d, addr: %d", byte_out, addr);
+                // end
                 if (cur_byte == lsb_data_size) begin
                     cur_byte   <= 3'b000;
                     state      <= `STALL;
@@ -140,7 +161,7 @@ always @(posedge clk) begin
                 end
                 else begin
                     cur_byte   <= cur_byte + 1;
-                    addr       <= addr + 1;
+                    addr       <= cur_byte ? addr + 1 : addr;
                     ram_enable <= 1'b1;
                 end
             end
@@ -152,7 +173,6 @@ always @(posedge clk) begin
                     3'b011: read_data[23:16] <= byte_in;
                     3'b100: read_data[31:24] <= byte_in;
                 endcase
-
                 if (cur_byte == lsb_data_size) begin
                     cur_byte   <= 3'b000;
                     state      <= `STALL;
@@ -161,10 +181,10 @@ always @(posedge clk) begin
                     lw_type    <= 1'b0;
                     addr       <= 32'b0;
                     if (op == `LH) begin
-                        read_data[31:16] <= {16{read_data[15]}};
+                        read_data[31:16] <= {16{byte_in[7]}};
                     end
                     else if (op == `LB) begin
-                        read_data[31:8] <= {24{read_data[7]}};
+                        read_data[31:8] <= {24{byte_in[7]}};
                     end
                 end
                 else begin
@@ -174,6 +194,8 @@ always @(posedge clk) begin
                 end
             end   
             else if (state == `FETCH) begin
+                // $display("MemController: FETCH");
+                // $display("pc: %x", addr);
                 case (cur_byte)
                     3'b001: i_cache_data[7:0]   <= byte_in;
                     3'b010: i_cache_data[15:8]  <= byte_in;
@@ -194,7 +216,13 @@ always @(posedge clk) begin
                 end
             end
             else if (state == `STALL) begin
-                state         <= `IDLE;
+                // if (stall_time == 0) begin
+                //     state <= `IDLE;
+                // end
+                // else begin
+                //     stall_time <= stall_time - 1;
+                // end
+                state <= `IDLE;
                 lsb_valid     <= 1'b0;
                 i_cache_valid <= 1'b0;
             end

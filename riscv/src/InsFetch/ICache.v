@@ -20,8 +20,8 @@ module ICache (
     // port with InsFetch
     input wire        fetch_enable,
     input wire [31:0] pc,
-    output reg        hit,
-    output reg [31:0] hit_data
+    output wire       hit,
+    output wire[31:0] hit_data
 
 );
 
@@ -30,10 +30,12 @@ reg [31:11] tag   [`CACHE_SIZE - 1:0];
 reg         valid [`CACHE_SIZE - 1:0];
 reg         state;
 wire [10:2] index = pc[10:2];
-wire        cache_hit = fetch_enable && (tag[index] == pc[`TAG_RANGE]) && valid[index];
+assign hit = fetch_enable && (tag[index] == pc[`TAG_RANGE]) && valid[index];
+assign hit_data = data[index];
 integer     i;
 
 always @(posedge clk) begin
+    // $display("ICache state = %d", state);
     if (rst) begin
         // reset
         state         <= `IDLE;
@@ -48,28 +50,29 @@ always @(posedge clk) begin
     else if (~rdy) begin // wait
     end
     else if (fetch_enable) begin
-        if (cache_hit) begin
+        // $display("ICache: pc = %d", pc);
+        // $display("ICache: cache_hit = %d", hit);
+        // $display("ICache state = %d", state);
+        if (hit) begin
             mem_enable  <= 1'b0;
-            hit         <= 1'b1;
-            hit_data    <= data[index];
+            state       <= `IDLE;
         end
-        else if (state == `BUSY) begin
-            if (mem_valid) begin
-                state                  <= `IDLE;
-                mem_enable             <= 1'b0;
-                data[inst_addr[10:2]]  <= inst;
-                tag[inst_addr[10:2]]   <= inst[`TAG_RANGE];
-                valid[inst_addr[10:2]] <= 1'b1;
+        else begin
+            if (state == `BUSY) begin
+                if (mem_valid) begin
+                    state                  <= `IDLE;
+                    mem_enable             <= 1'b0;
+                    data[inst_addr[10:2]]  <= inst;
+                    tag[inst_addr[10:2]]   <= inst_addr[`TAG_RANGE];
+                    valid[inst_addr[10:2]] <= 1'b1;
+                end
+            end
+            else if (state == `IDLE) begin
+                mem_enable <= 1'b1;
+                inst_addr  <= pc;
+                state      <= `BUSY;
             end
         end
-        else if (state == `IDLE) begin
-            mem_enable <= 1'b1;
-            inst_addr  <= pc;
-            state      <= `BUSY;
-        end
-    end
-    else begin
-        mem_enable  <= 1'b0;
     end
 end
 endmodule

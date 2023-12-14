@@ -111,6 +111,7 @@ wire [4:0]  to_rob_Qj;
 wire [4:0]  to_rob_rd;
 wire [6:0]  to_rob_op;
 wire        to_rob_jump_choice;
+wire        to_rob_is_jump;
 
 // dispatcher & RS
 wire        rs_full;
@@ -230,12 +231,10 @@ InsFetcher ins_fetcher(
   .predict_pc(if_predictor_pc),
   .should_reset(wrong_commit),
   .reset_pc(reset_pc),
-  .hit_valid(IF_hit),
-  .hit_inst(IF_hit_data),
-  .cache_valid(i_cache_valid),
-  .cache_inst(i_cache_data),
+  .cache_valid(IF_hit),
+  .cache_inst(IF_hit_data),
   .cache_pc(IF_pc),
-  .fetch_enable(fetch_enable)
+  .fetch_enable(IF_enable)
 );
 
 Parser parser(
@@ -278,6 +277,7 @@ Dispatcher dispatcher(
   .to_rob_rd(to_rob_rd),
   .to_rob_op(to_rob_op),
   .to_rob_jump_choice(to_rob_jump_choice),
+  .to_rob_is_jump(to_rob_is_jump),
   .rs_full(rs_full),
   .to_rs_valid(to_rs_valid),
   .to_rs_imm(to_rs_imm),
@@ -345,6 +345,7 @@ ReOrderBuffer reorder_buffer (
   .dispatch_rd(to_rob_rd),
   .dispatch_op(to_rob_op),
   .dispatch_jump_choice(to_rob_jump_choice),
+  .dispatch_is_jump(to_rob_is_jump),
   .dispatch_Qi(to_rob_Qi),
   .dispatch_Qj(to_rob_Qj),
   .Qi_check(rob_Qi_check),

@@ -34,11 +34,15 @@ module ReservationStation (
     input wire [6:0]  dispatch_op,
     input wire [31:0] dispatch_Vi,
     input wire [31:0] dispatch_Vj,
-    output reg        rs_full
+    output wire       rs_full
 );
 
-wire [`RS_RANGE] first_empty;
-wire [`RS_RANGE] first_ready;
+wire [5:0]  first_empty;
+wire [5:0]  first_ready;
+wire [4:0]  Qi_in = (alu_valid && alu_rob_id == dispatch_Qi) ? 0 : (lsb_valid && lsb_rob_id == dispatch_Qi) ? 0 : dispatch_Qi;
+wire [4:0]  Qj_in = (alu_valid && alu_rob_id == dispatch_Qj) ? 0 : (lsb_valid && lsb_rob_id == dispatch_Qj) ? 0 : dispatch_Qj;
+wire [31:0] Vi_in = (alu_valid && alu_rob_id == dispatch_Qi) ? alu_res : (lsb_valid && lsb_rob_id == dispatch_Qi) ? lsb_res : dispatch_Vi;
+wire [31:0] Vj_in = (alu_valid && alu_rob_id == dispatch_Qj) ? alu_res : (lsb_valid && lsb_rob_id == dispatch_Qj) ? lsb_res : dispatch_Vj;
 
 // internal data
 reg        busy[`RS_ARR];
@@ -81,9 +85,14 @@ assign first_ready = (busy[0] == 1 && Qi[0] == 0 && Qj[0] == 0) ? 0 : (busy[1] =
                      (busy[26] == 1 && Qi[26] == 0 && Qj[26] == 0) ? 26 : (busy[27] == 1 && Qi[27] == 0 && Qj[27] == 0) ? 27 :
                      (busy[28] == 1 && Qi[28] == 0 && Qj[28] == 0) ? 28 : (busy[29] == 1 && Qi[29] == 0 && Qj[29] == 0) ? 29 :
                      (busy[30] == 1 && Qi[30] == 0 && Qj[30] == 0) ? 30 : (busy[31] == 1 && Qi[31] == 0 && Qj[31] == 0) ? 31 : 32;
-integer i;
+
+assign rs_full = (first_empty == `RS_SIZE);
+
+integer i, clk_count = 0;
 
 always @(posedge clk) begin
+    // $display("RS clk: %d", clk_count);
+    clk_count = clk_count + 1;
     if (rst || wrong_commit) begin
         for (i = 0; i < `RS_SIZE; i = i + 1) begin
             busy[i] <= 0;
@@ -129,6 +138,11 @@ always @(posedge clk) begin
             end
         end
         if (first_ready < `RS_SIZE) begin // can execute
+            // $display("RS execute, first_ready: %d", first_ready);
+            // $display("RS execute, pc: %d", pc[first_ready]);
+            // if (rd[first_ready] == 3) begin
+            //     $display("Vi: %d, Vj: %d", Vi[first_ready], Vj[first_ready]);
+            // end
             alu_op            <= op[first_ready];
             Vi_alu            <= Vi[first_ready];
             Vj_alu            <= Vj[first_ready];
@@ -146,13 +160,19 @@ always @(posedge clk) begin
             alu_rd <= 0;
         end
         if (first_empty < `RS_SIZE && dispatch_valid) begin // can dispatch
+            // $display("RS dispatch, pc: %d", dispatch_pc);
+            // $display("RS dispatch, first_empty: %d", first_empty);
+            // if (dispatch_rd == 3) begin
+            //     $display("Qi: %d, Qj: %d", Qi_in, Qj_in);
+            //     $display("Vi: %d, Vj: %d", Vi_in, Vj_in);
+            // end
             busy[first_empty] <= 1;
             pc[first_empty]   <= dispatch_pc;
             imm[first_empty]  <= dispatch_imm;
-            Vi[first_empty]   <= dispatch_Vi;
-            Vj[first_empty]   <= dispatch_Vj;
-            Qi[first_empty]   <= dispatch_Qi;
-            Qj[first_empty]   <= dispatch_Qj;
+            Vi[first_empty]   <= Vi_in;
+            Vj[first_empty]   <= Vj_in;
+            Qi[first_empty]   <= Qi_in;
+            Qj[first_empty]   <= Qj_in;
             rd[first_empty]   <= dispatch_rd;
             op[first_empty]   <= dispatch_op;
         end

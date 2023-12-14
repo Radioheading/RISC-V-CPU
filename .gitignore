@@ -4,3 +4,5 @@ riscv/testspace/*
 *.vcd
 
 !.keep
+
+riscv/testspace/*

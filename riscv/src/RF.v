@@ -25,6 +25,12 @@ module RF (
     output wire [31:0] dispatch_Vj
 );
 
+integer debug_file;
+
+initial begin
+    debug_file = $fopen("rf_debug.txt");
+end
+
 // data
 reg [31:0] register_file[31:0];
 reg [4:0]  dependency[31:0];
@@ -34,9 +40,10 @@ assign dispatch_Qj = (rob_valid && dest == dispatch_rs2 && dest_depend == depend
 assign dispatch_Vi = (rob_valid && dest == dispatch_rs1 && dest_depend == dependency[dispatch_rs1]) ? rob_data : register_file[dispatch_rs1];
 assign dispatch_Vj = (rob_valid && dest == dispatch_rs2 && dest_depend == dependency[dispatch_rs2]) ? rob_data : register_file[dispatch_rs2];
 
-integer i;
+integer i, clk_count = 0;
 
 always @(posedge clk) begin
+    clk_count = clk_count + 1;
     if (rst) begin
         for (i = 0; i < 32; i = i + 1) begin
             register_file[i] <= 0;
@@ -54,6 +61,8 @@ always @(posedge clk) begin
                 dependency[dispatch_name] = dispatch_rename;
             end
             if (rob_valid && dest) begin
+                // $fdisplay(debug_file, "clk: %d", clk_count);
+                $fdisplay(debug_file, "RF: %d <= %d", dest, $signed(rob_data));
                 register_file[dest] <= rob_data;
                 if (dest_depend == dependency[dest]) begin
                     dependency[dest] <= 0;

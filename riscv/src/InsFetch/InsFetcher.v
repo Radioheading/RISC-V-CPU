@@ -27,8 +27,6 @@ module InsFetcher (
     input wire [31:0] reset_pc,
 
     // port with i-cache
-    input wire        hit_valid,
-    input wire [31:0] hit_inst,
     input wire        cache_valid,
     input wire [31:0] cache_inst,
     output reg [31:0] cache_pc,
@@ -38,9 +36,14 @@ module InsFetcher (
 reg [1:0]  state;
 reg [31:0] pc; // the real pc is maintained in InsFetcher
 assign     predict_pc   = pc;
-assign     predict_inst = hit_inst; 
+assign     predict_inst = cache_inst; 
+
+integer clk_count = 0;
 
 always @(posedge clk) begin
+    clk_count = clk_count + 1;
+    // $display("InsFetch clk: %d", clk_count);
+    // $display("InsFetch pc: %x", pc);
     if (rst) begin
         // reset output to false/zero
         if_jump         <= 1'b0;
@@ -49,7 +52,8 @@ always @(posedge clk) begin
         dispatch_pc     <= 0;
         cache_pc        <= 0;
         fetch_enable    <= 1'b0;
-        state          <= `IDLE;
+        state           <= `IDLE;
+        pc              <= 0;
     end
     else if (~rdy) begin // wait
     end
@@ -73,7 +77,13 @@ always @(posedge clk) begin
             end
         end
         else if (state == `BUSY) begin
+            // $display("InsFetcher: BUSY");
+            // $display("InsFetcher: cache_valid = %d", cache_valid);
+            // $display("InsFetcher: issue_stall = %d", issue_stall);
             if (~issue_stall && cache_valid) begin
+                fetch_enable <= 1'b0;
+                // $display("InsFetcher: get something from cache");
+                // $display("InsFetcher: cache_inst = %d", cache_inst);
                 if (cache_inst[6:0] == `JAL_type) begin
                     pc      <= pc + {{20{cache_inst[31]}}, cache_inst[19:12], cache_inst[20], cache_inst[30:21], 1'b0};
                     if_jump <= 1'b1;
@@ -86,9 +96,7 @@ always @(posedge clk) begin
                 if_valid      <= 1'b1;
                 dispatch_inst <= cache_inst;
                 dispatch_pc   <= pc;
-
-                cache_pc      <= pc;
-                fetch_enable  <= 1'b1;
+                state         <= `IDLE;
             end
         end
     end

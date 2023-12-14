@@ -33,6 +33,7 @@ module Dispatcher (
     output reg [4:0]  to_rob_rd,
     output reg [6:0]  to_rob_op,
     output reg        to_rob_jump_choice,
+    output reg        to_rob_is_jump,
     // port with RS
     input wire        rs_full,
     output reg        to_rs_valid,
@@ -80,7 +81,11 @@ module Dispatcher (
     input wire [31:0] lsb_res,
     input wire [4:0]  lsb_rob_id
 );
-wire   part_full   = rob_full || rs_full || lsb_full;
+wire        part_full   = rob_full || rs_full || lsb_full;
+wire [4:0]  Qi = (alu_valid && alu_rob_id == to_rf_Qi && alu_rob_id) ? 0 : (lsb_valid && lsb_rob_id == to_rf_Qi && lsb_rob_id) ? 0 : Qi_valid ? 0 : to_rf_Qi;
+wire [4:0]  Qj = (alu_valid && alu_rob_id == to_rf_Qj && alu_rob_id) ? 0 : (lsb_valid && lsb_rob_id == to_rf_Qj && lsb_rob_id) ? 0 : Qj_valid ? 0 : to_rf_Qj;
+wire [31:0] Vi = (alu_valid && alu_rob_id == to_rf_Qi && alu_rob_id) ? alu_res : (lsb_valid && lsb_rob_id == to_rf_Qi && lsb_rob_id) ? lsb_res : Qi_valid ? Vi_value : to_rf_Vi;
+wire [31:0] Vj = (alu_valid && alu_rob_id == to_rf_Qj && alu_rob_id) ? alu_res : (lsb_valid && lsb_rob_id == to_rf_Qj && lsb_rob_id) ? lsb_res : Qj_valid ? Vj_value : to_rf_Vj;
 assign issue_stall = part_full;
 assign parse_inst  = if_inst;
 assign to_rf_rs1   = rs1;
@@ -99,6 +104,7 @@ always @(posedge clk) begin
         to_rob_rd          <= 0;
         to_rob_op          <= 0;
         to_rob_jump_choice <= 0;
+        to_rob_is_jump     <= 0;
         to_rs_valid        <= 0;
         to_rs_imm          <= 0;
         to_rs_pc           <= 0;
@@ -125,38 +131,48 @@ always @(posedge clk) begin
         to_lsb_valid       <= 0;
         to_rs_valid        <= 0;
         if (if_valid && ~part_full) begin
+            // if (rename_rd == 3) begin
+            //     $display("dispatch Qi: %d, dispatch Qj: %d", Qi, Qj);
+            //     $display("dispatch Vi: %d, dispatch Vj: %d", Vi, Vj);
+            //     $display("Qi valid: %d, Qj valid: %d", Qi_valid, Qj_valid);
+            //     $display("alu has result: %d", (alu_valid && alu_rob_id == to_rf_Qi && alu_rob_id));
+            //     $display("lsb has result: %d", (lsb_valid && lsb_rob_id == to_rf_Qj && lsb_rob_id));
+            //     $display("to rf rs1: ", to_rf_rs1);
+            //     $display("real Vi: %d", (alu_valid && alu_rob_id == to_rf_Qi && alu_rob_id) ? alu_res : (lsb_valid && lsb_rob_id == to_rf_Qi && lsb_rob_id) ? lsb_res : Qi_valid ? Vi_value : to_rf_Vi);
+            // end
             to_rf_valid        <= 1;
             to_rf_name         <= rd;
             to_rf_rename       <= rename_rd;
             to_rob_valid       <= 1;
             to_rob_imm         <= imm;
             to_rob_pc          <= if_pc;
-            to_rob_Qi          <= Qi_valid ? 0 : to_rf_Qi;
-            to_rob_Qj          <= Qj_valid ? 0 : to_rf_Qj;
-            to_rob_rd          <= Qi_valid ? Vi_value : to_rf_Vi;
-            to_rob_op          <= Qj_valid ? Vj_value : to_rf_Vj;
+            to_rob_Qi          <= Qi;
+            to_rob_Qj          <= Qj;
+            to_rob_rd          <= rd;
+            to_rob_op          <= op;
             to_rob_jump_choice <= if_jump;
+            to_rob_is_jump     <= is_jump;
             if (is_ls) begin
                 to_lsb_valid       <= 1;
                 to_lsb_imm         <= imm;
                 to_lsb_pc          <= if_pc;
-                to_lsb_Qi          <= Qi_valid ? 0 : to_rf_Qi;
-                to_lsb_Qj          <= Qj_valid ? 0 : to_rf_Qj;
-                to_lsb_rd          <= rd;
+                to_lsb_Qi          <= Qi;
+                to_lsb_Qj          <= Qj;
+                to_lsb_rd          <= rename_rd;
                 to_lsb_op          <= op;
-                to_lsb_Vi          <= Qi_valid ? Vi_value : to_rf_Vi;
-                to_lsb_Vj          <= Qj_valid ? Vj_value : to_rf_Vj;
+                to_lsb_Vi          <= Vi;
+                to_lsb_Vj          <= Vj;
             end
             else begin
                 to_rs_valid        <= 1;
                 to_rs_imm          <= imm;
                 to_rs_pc           <= if_pc;
-                to_rs_Qi           <= Qi_valid ? 0 : to_rf_Qi;
-                to_rs_Qj           <= Qj_valid ? 0 : to_rf_Qj;
-                to_rs_rd           <= rd;
+                to_rs_Qi           <= Qi;
+                to_rs_Qj           <= Qj;
+                to_rs_rd           <= rename_rd;
                 to_rs_op           <= op;
-                to_rs_Vi           <= Qi_valid ? Vi_value : to_rf_Vi;
-                to_rs_Vj           <= Qj_valid ? Vj_value : to_rf_Vj;
+                to_rs_Vi           <= Vi;
+                to_rs_Vj           <= Vj;
             end
         end
         else begin

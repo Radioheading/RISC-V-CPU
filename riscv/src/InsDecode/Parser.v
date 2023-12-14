@@ -11,11 +11,13 @@ module Parser (
     output reg [6:0]  op
 );
 
-wire       inst_type = inst[6:0];
+wire [6:0] inst_type = inst[6:0];
 wire [2:0] funct_3   = inst[`FUNCT_3];
 wire [6:0] r_judge   = inst[31:25];
 
 always @(*) begin
+    // $display("Parser inst: %b", inst);
+    // $display("Parser inst_type: %b", inst_type);
     is_load_store = (inst_type == `L_type || inst_type == `S_type);
     is_j_type     = (inst_type == `JAL_type || inst_type == `JALR_type || inst_type == `B_type);
 
@@ -39,6 +41,8 @@ always @(*) begin
             endcase
         end
         `I_type: begin
+            rs2 = 0;
+            // $display("rs1: %d, rs2: %d", rs1, rs2);
             imm = {{20{inst[31]}}, inst[31:20]}; // sign-extend
             case (funct_3)
                 3'b000: op = `ADDI;
@@ -58,7 +62,8 @@ always @(*) begin
             endcase
         end
         `L_type: begin
-            imm = {{21{inst[31]}}, inst[30:20]};
+            rs2 = 0;
+            imm = {{20{inst[31]}}, inst[31:20]};
             case (funct_3)
                 3'b000: op = `LB;
                 3'b001: op = `LH;
@@ -74,6 +79,7 @@ always @(*) begin
                 3'b001: op = `SH;
                 3'b010: op = `SW;
             endcase
+            rd = 0;
         end
         `B_type: begin
             imm = {{20{inst[31]}}, inst[7], inst[30:25], inst[11:8], 1'b0};
@@ -85,22 +91,31 @@ always @(*) begin
                 3'b110: op = `BLTU;
                 3'b111: op = `BGEU;
             endcase
+            rd = 0;
         end
         `JAL_type: begin
+            rs1 = 0;
+            rs2 = 0;
             op  = `JAL;
             imm = {{12{inst[31]}}, inst[19:12], inst[20], inst[30:21], 1'b0};
         end
         `JALR_type: begin
+            rs2 = 0;
             op  = `JALR;
             imm = {{20{inst[31]}}, inst[31:20]};
         end
         `LUI_type: begin
+            rs1 = 0;
+            rs2 = 0;
             op = `LUI;
-            imm = {inst[31:20], 12'b0};
+            imm = {inst[31:12], 12'b0};
+
         end
         `AUIPC_type: begin
+            rs1 = 0;
+            rs2 = 0;
             op = `AUIPC;
-            imm = {inst[31:20], 12'b0};
+            imm = {inst[31:12], 12'b0};
         end
     endcase
 end

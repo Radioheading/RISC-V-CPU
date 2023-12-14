@@ -45,15 +45,19 @@ module LoadStoreBuffer (
     output reg [4:0]  lsb_rob_id
 );
 
-wire            empty, full;
-reg [`RS_RANGE] head, tail;
+wire             empty, full;
+reg [`RS_RANGE]  head, tail;
 wire [`RS_RANGE] next_head, next_tail;
-reg [1:0]       state;
+reg  [1:0]       state;
+wire [4:0]       Qi_in = (alu_valid && alu_rob_id == dispatch_Qi) ? 0 : (lsb_valid && lsb_rob_id == dispatch_Qi) ? 0 : dispatch_Qi;
+wire [4:0]       Qj_in = (alu_valid && alu_rob_id == dispatch_Qj) ? 0 : (lsb_valid && lsb_rob_id == dispatch_Qj) ? 0 : dispatch_Qj;
+wire [31:0]      Vi_in = (alu_valid && alu_rob_id == dispatch_Qi) ? alu_res : (lsb_valid && lsb_rob_id == dispatch_Qi) ? lsb_res : dispatch_Vi;
+wire [31:0]      Vj_in = (alu_valid && alu_rob_id == dispatch_Qj) ? alu_res : (lsb_valid && lsb_rob_id == dispatch_Qj) ? lsb_res : dispatch_Vj;
 
 assign next_head = (head + 1) % `LSB_SIZE;
 assign next_tail = (tail + 1) % `LSB_SIZE;
 assign empty = (head == tail);
-assign full = (next_head == tail);
+assign full = (next_tail == head);
 assign lsb_full = full;
 
 // data of load-store buffer
@@ -66,8 +70,15 @@ reg [31:0] Vi[`LSB_ARR];
 reg [31:0] Vj[`LSB_ARR];
 
 integer i;
+integer clk_count = 0;
+integer debug_file;
+
+initial begin
+    debug_file = $fopen("lsb_debug.txt");
+end
 
 always @(posedge clk) begin
+    clk_count = clk_count + 1;
     if (rst || wrong_commit) begin
         state <= `IDLE;
         head  <= 0;
@@ -95,11 +106,11 @@ always @(posedge clk) begin
         if (dispatch_valid && full == 0) begin
             op[next_tail]  <= dispatch_op;
             imm[next_tail] <= dispatch_imm;
-            Qi[next_tail]  <= dispatch_Qi;
-            Qj[next_tail]  <= dispatch_Qj;
+            Qi[next_tail]  <= Qi_in;
+            Qj[next_tail]  <= Qj_in;
             rd[next_tail]  <= dispatch_rd;
-            Vi[next_tail]  <= dispatch_Vi;
-            Vj[next_tail]  <= dispatch_Vj;
+            Vi[next_tail]  <= Vi_in;
+            Vj[next_tail]  <= Vj_in;
             tail           <= next_tail;
         end 
         if (alu_valid) begin
@@ -116,12 +127,12 @@ always @(posedge clk) begin
         end
         if (lsb_valid) begin
             for (i = 0; i < `LSB_SIZE; i = i + 1) begin
-                if (Qi[i] == rob_commit_id) begin
-                    Vi[i] <= mem_res;
+                if (Qi[i] == lsb_rob_id) begin
+                    Vi[i] <= lsb_res;
                     Qi[i] <= 0;
                 end
-                if (Qj[i] == rob_commit_id) begin
-                    Vj[i] <= mem_res;
+                if (Qj[i] == lsb_rob_id) begin
+                    Vj[i] <= lsb_res;
                     Qj[i] <= 0;
                 end
             end
@@ -130,33 +141,41 @@ always @(posedge clk) begin
         `IDLE: begin
             lsb_valid <= 0;
             if (full == 0 && Qi[next_head] == 0 && Qj[next_head] == 0 && rob_valid && rd[next_head] == rob_commit_id) begin
+                // $display("LSB: going to load or store");                
                 // access memory
                 head <= next_head;
-
                 load_store_enable <= 1;
                 load_store_addr   <= Vi[next_head] + imm[next_head];
+                load_store_data   <= Vj[next_head];
                 load_store_op     <= op[next_head];
                 load_or_store     <= op[next_head] >= `LB && op[next_head] <= `LHU;
                 lsb_rob_id        <= rob_commit_id;
-                state             <= (op[next_head] >= `LB && op[next_head] <= `LHU) ? 1 : 0;
+                state             <= (op[next_head] >= `LB && op[next_head] <= `LHU) ? 1 : 2;
             end
         end
         `LOAD: begin
-            lsb_valid <= 0;
             if (mem_valid) begin
                 lsb_valid  <= 1;
                 lsb_res    <= mem_res;
                 state      <= `IDLE;
                 load_store_enable <= 0;
+                $fdisplay(debug_file, "clk: %d", clk_count);
+                $fdisplay(debug_file, "load address: %d, value: %d", load_store_addr, mem_res);
+            end
+            else begin
+                lsb_valid <= 0;
             end
         end
         `STORE: begin
-            lsb_valid <= 0;
             if (mem_valid) begin
                 lsb_valid  <= 1;
                 lsb_res    <= 0;
                 state      <= `IDLE;
                 load_store_enable <= 0;
+                // $display("LSB: store finish");
+            end
+            else begin
+                lsb_valid <= 0;
             end
         end
         endcase

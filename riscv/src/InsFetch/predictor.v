@@ -31,7 +31,7 @@ integer i;
 always @(posedge clk) begin
     if (rst) begin // just reset
         for (i = 0; i < 128; i = i + 1) begin
-            judger[i] <= 0;
+            judger[i] <= 1;
             end
     end
     if (rdy) begin

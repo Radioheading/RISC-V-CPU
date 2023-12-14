@@ -34,6 +34,7 @@ module ReOrderBuffer (
     input wire         dispatch_jump_choice,
     input wire  [4:0]  dispatch_Qi,
     input wire  [4:0]  dispatch_Qj,
+    input wire         dispatch_is_jump,
 
     input wire  [4:0]  Qi_check,
     input wire  [4:0]  Qj_check,
@@ -57,7 +58,7 @@ wire [`ROB_RANGE] next_head, next_tail;
 assign next_head = head + 1 == `ROB_SIZE ? 1 : head + 1;
 assign next_tail = tail + 1 == `ROB_SIZE ? 1 : tail + 1;
 assign empty = (head == tail);
-assign full = (next_head == tail);
+assign full = (next_tail == head);
 assign rob_full = full;
 
 // data of reorder buffer
@@ -76,13 +77,19 @@ assign Qi_valid  = ready[Qi_check];
 assign Qj_valid  = ready[Qj_check];
 assign Vi_value  = res[Qi_check];
 assign Vj_value  = res[Qj_check];
-assign ls_commit = op[next_head] >= `LB && op[next_head] <= `SW;
+assign ls_commit = ~empty && op[next_head] >= `LB && op[next_head] <= `SW;
 assign ls_rob_id = next_head;
 
 integer i;
 
+integer debug_file;
+initial begin
+    debug_file = $fopen("rob_debug.txt");
+end
+
 always @(posedge clk) begin
     if (rst || wrong_commit) begin
+        $display("ROB reset");
         head                <= 0;
         tail                <= 0;
         wrong_commit        <= 0;
@@ -119,10 +126,12 @@ always @(posedge clk) begin
             jump_pc [alu_rob_id]   <= alu_pc;
         end
         if (dispatch_valid && ~full) begin
+            // $display("ROB dispatch, position: %d", next_tail);
+            // $display("ROB dispatch, pc: %d", dispatch_pc);
             op[next_tail]          <= dispatch_op;
             rd[next_tail]          <= dispatch_rd;
             pc[next_tail]          <= dispatch_pc;
-            is_jump[next_tail]     <= dispatch_jump_choice;
+            is_jump[next_tail]     <= dispatch_is_jump;
             prev_choice[next_tail] <= dispatch_jump_choice;
             ready[next_tail]       <= 0;
             now_choice[next_tail]  <= 0;
@@ -132,7 +141,10 @@ always @(posedge clk) begin
         end
         if (ready[next_head] && ~empty) begin
             head <= next_head;
-            
+            // $display("ROB commit, position: %d", next_head);
+            // if (rd[next_head] == 13 && ls_commit) begin
+            //     $fdisplay(debug_file, "ROB commit, pc: %d", pc[next_head]);
+            // end
             if (is_jump[next_head]) begin
                 predictor_update_pc <= pc[next_head];
                 predictor_update    <= now_choice[next_head];
@@ -141,6 +153,8 @@ always @(posedge clk) begin
             else begin
                 predictor_enable    <= 0;
             end
+            // $display("prev_choice: %d", prev_choice[next_head]);
+            // $display("now_choice: %d", now_choice[next_head]);
             if (prev_choice[next_head] != now_choice[next_head]) begin
                 wrong_commit <= 1;
                 true_pc      <= now_choice[next_head] ? jump_pc[next_head] : pc[next_head];
@@ -149,6 +163,7 @@ always @(posedge clk) begin
             commit_valid      <= 1;
             commit_rd         <= rd[next_head];
             commit_res        <= res[next_head];
+            // $display("rd: %d, ans: %d", rd[next_head], res[next_head]);
             commit_dependency <= next_head;
         end
         else begin
