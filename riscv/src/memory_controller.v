@@ -44,10 +44,10 @@ reg [2:0] cur_byte;
 reg       stall_time; // load or store: 2, fetch: 1
 
 integer clk_count = 0;
-integer debug_file;
-initial begin
-    debug_file = $fopen("memory_debug.txt");
-end
+// integer debug_file;
+// initial begin
+//     debug_file = $fopen("memory_debug.txt");
+// end
 always @(posedge clk) begin
     clk_count = clk_count + 1;
     // $display("MemController clk_count = %d", clk_count);
@@ -127,10 +127,10 @@ always @(posedge clk) begin
                 // $display("MemController: STORE");
                 // $display("store data size: %d", lsb_data_size);
                 // $display("cur_byte: %d", cur_byte);
-                if (cur_byte == 0) begin
-                    $fdisplay(debug_file, "clk: %d", clk_count);
-                    $fdisplay(debug_file, "store address: %d, size: %d, value: %d", addr, lsb_data_size, lsb_data);
-                end
+                // if (cur_byte == 0) begin
+                //     $fdisplay(debug_file, "clk: %d", clk_count);
+                //     $fdisplay(debug_file, "store address: %d, size: %d, value: %d", addr, lsb_data_size, lsb_data);
+                // end
                 if (cur_byte == lsb_data_size - 1) begin
                     cur_byte   <= 3'b000;
                     state      <= `STALL;
