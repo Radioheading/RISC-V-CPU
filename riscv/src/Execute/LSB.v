@@ -71,11 +71,10 @@ reg [31:0] Vj[`LSB_ARR];
 
 integer i;
 integer clk_count = 0;
-integer debug_file;
-
-initial begin
-    debug_file = $fopen("lsb_debug.txt");
-end
+// integer debug_file;
+// initial begin
+//     debug_file = $fopen("lsb_debug.txt");
+// end
 
 always @(posedge clk) begin
     clk_count = clk_count + 1;
@@ -159,8 +158,8 @@ always @(posedge clk) begin
                 lsb_res    <= mem_res;
                 state      <= `IDLE;
                 load_store_enable <= 0;
-                $fdisplay(debug_file, "clk: %d", clk_count);
-                $fdisplay(debug_file, "load address: %d, value: %d", load_store_addr, mem_res);
+                // $fdisplay(debug_file, "clk: %d", clk_count);
+                // $fdisplay(debug_file, "load address: %d, value: %d", load_store_addr, mem_res);
             end
             else begin
                 lsb_valid <= 0;

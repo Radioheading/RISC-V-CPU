@@ -131,6 +131,12 @@ always @(posedge clk) begin
         to_lsb_valid       <= 0;
         to_rs_valid        <= 0;
         if (if_valid && ~part_full) begin
+            // if (Qi) begin
+            //     $display("has dependency on Qi😅");
+            // end
+            // if (Qj) begin
+            //     $display("has dependency on Qj😅");
+            // end
             // if (rename_rd == 3) begin
             //     $display("dispatch Qi: %d, dispatch Qj: %d", Qi, Qj);
             //     $display("dispatch Vi: %d, dispatch Vj: %d", Vi, Vj);

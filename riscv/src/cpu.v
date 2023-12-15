@@ -42,9 +42,6 @@ wire        lsb_valid;
 wire [31:0] lsb_result;
 wire [4:0]  lsb_rob_id;
 
-// memory controller & ram
-wire        ram_enable;
-
 // memory controller & i-cache
 wire        fetch_enable;
 wire [31:0] fetch_inst_addr;
@@ -172,7 +169,6 @@ MemController mem_controller(
   .rdy(rdy_in),
   .byte_in(mem_din),
   .io_buffer_full(io_buffer_full),
-  .ram_enable(ram_enable),
   .lw_type(mem_wr),
   .addr(mem_a),
   .byte_out(mem_dout),

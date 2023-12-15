@@ -81,15 +81,14 @@ assign ls_commit = ~empty && op[next_head] >= `LB && op[next_head] <= `SW;
 assign ls_rob_id = next_head;
 
 integer i;
-
-integer debug_file;
-initial begin
-    debug_file = $fopen("rob_debug.txt");
-end
+// integer debug_file;
+// initial begin
+//     debug_file = $fopen("rob_debug.txt");
+// end
 
 always @(posedge clk) begin
     if (rst || wrong_commit) begin
-        $display("ROB reset");
+        // $display("ROB reset");
         head                <= 0;
         tail                <= 0;
         wrong_commit        <= 0;
@@ -144,6 +143,11 @@ always @(posedge clk) begin
             // $display("ROB commit, position: %d", next_head);
             // if (rd[next_head] == 13 && ls_commit) begin
             //     $fdisplay(debug_file, "ROB commit, pc: %d", pc[next_head]);
+            // end
+            // if (res[next_head] == -323398867 && rd[next_head]) begin
+            //     $display("ROB commit, pc: %x", pc[next_head]);
+            //     $display("ROB commit, rd: %d", rd[next_head]);
+            //     $display("ROB commit, res: %d", res[next_head]);
             // end
             if (is_jump[next_head]) begin
                 predictor_update_pc <= pc[next_head];

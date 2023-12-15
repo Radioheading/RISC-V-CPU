@@ -43,7 +43,7 @@
 `define    BLT      6'd7        //Branch Less Than
 `define    BGE      6'd8        //Branch Greater than or Equal
 `define    BLTU     6'd9        //Branch Less Than Unsigned
-`define    BGEU     6'd10        //Branch >  Unsigned
+`define    BGEU     6'd10       //Branch >  Unsigned
 `define    LB       6'd11       // Load Byte
 `define    LH       6'd12 
 `define    LW       6'd13 
