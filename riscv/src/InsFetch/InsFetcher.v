@@ -86,9 +86,9 @@ always @(posedge clk) begin
                 fetch_enable <= 1'b0;
                 // $display("InsFetcher: get something from cache");
                 // $display("InsFetcher: cache_inst = %d", cache_inst);
-                // if (cache_inst == 1574931) begin
-                //     $display("clk: %d", clk_count);
-                //     $display("Fuck Instruction, pc: %x", pc);
+                // if (pc == 4624) begin
+                //     $display("InsFetcher: clk = %d", clk_count);
+                //     $display("Fuck Instruction: %x", cache_inst);
                 // end
                 if (cache_inst[6:0] == `JAL_type) begin
                     pc      <= pc + {{20{cache_inst[31]}}, cache_inst[19:12], cache_inst[20], cache_inst[30:21], 1'b0};

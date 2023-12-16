@@ -62,7 +62,7 @@ always @(posedge clk) begin
             end
             if (rob_valid && dest) begin
                 // if (clk_count < 200000) begin
-                //     $fdisplay(debug_file, "RF: %d <= %d", dest, $signed(rob_data));
+                    // $fdisplay(debug_file, "RF: %d <= %d", dest, $signed(rob_data));
                 // end
                 register_file[dest] <= rob_data;
                 if (dest_depend == dependency[dest]) begin

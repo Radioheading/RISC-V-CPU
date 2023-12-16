@@ -145,7 +145,7 @@ always @(posedge clk) begin
             // if (rd[next_head] == 13 && ls_commit) begin
             //     $fdisplay(debug_file, "ROB commit, pc: %d", pc[next_head]);
             // end
-            // if (res[next_head] == -323398867 && rd[next_head]) begin
+            // if (res[next_head] == -2 && rd[next_head] == 8) begin
             //     $display("ROB commit, pc: %x", pc[next_head]);
             //     $display("ROB commit, rd: %d", rd[next_head]);
             //     $display("ROB commit, res: %d", res[next_head]);

@@ -4,7 +4,7 @@
 `define BUSY        1'b0
 `define CACHE_RANGE 10:2
 `define CACHE_SIZE  512
-`define TAG_RANGE   31:11
+`define TAG_RANGE   17:11
 
 module ICache (
     input wire clk,
@@ -25,17 +25,16 @@ module ICache (
 
 );
 
-reg [31:0]  data  [`CACHE_SIZE - 1:0];
-reg [31:11] tag   [`CACHE_SIZE - 1:0];
-reg         valid [`CACHE_SIZE - 1:0];
-reg         state;
-wire [10:2] index = pc[10:2];
+reg [31:0]          data  [`CACHE_SIZE - 1:0];
+reg [`TAG_RANGE]    tag   [`CACHE_SIZE - 1:0];
+reg                 valid [`CACHE_SIZE - 1:0];
+reg                 state;
+wire [`CACHE_RANGE] index = pc[`CACHE_RANGE];
 assign hit = fetch_enable && (tag[index] == pc[`TAG_RANGE]) && valid[index] || mem_valid && inst_addr == pc;
 assign hit_data = mem_valid && inst_addr == pc ? inst : data[index];
-integer     i;
+integer i;
 
 always @(posedge clk) begin
-    // $display("ICache state = %d", state);
     if (rst) begin
         // reset
         state         <= `IDLE;
@@ -43,35 +42,26 @@ always @(posedge clk) begin
         inst_addr     <= 32'b0;
         for (i = 0; i < `CACHE_SIZE; i = i + 1) begin
             data[i]  <= 32'b0;
-            tag[i]   <= 21'b0;
+            tag[i]   <= 7'b0;
             valid[i] <= 1'b0;
         end
     end 
     else if (~rdy) begin // wait
     end
     else if (fetch_enable) begin
-        // $display("ICache: pc = %d", pc);
-        // $display("ICache: cache_hit = %d", hit);
-        // $display("ICache state = %d", state);
-        if (hit) begin
-            mem_enable  <= 1'b0;
-            state       <= `IDLE;
+        if (state == `BUSY) begin                
+            if (mem_valid) begin
+                state                          <= `IDLE;
+                mem_enable                     <= 1'b0;
+                data[inst_addr[`CACHE_RANGE]]  <= inst;
+                tag[inst_addr[`CACHE_RANGE]]   <= inst_addr[`TAG_RANGE];
+                valid[inst_addr[`CACHE_RANGE]] <= 1'b1;
+            end
         end
-        else begin
-            if (state == `BUSY) begin
-                if (mem_valid) begin
-                    state                  <= `IDLE;
-                    mem_enable             <= 1'b0;
-                    data[inst_addr[10:2]]  <= inst;
-                    tag[inst_addr[10:2]]   <= inst_addr[`TAG_RANGE];
-                    valid[inst_addr[10:2]] <= 1'b1;
-                end
-            end
-            else if (state == `IDLE) begin
-                mem_enable <= 1'b1;
-                inst_addr  <= pc;
-                state      <= `BUSY;
-            end
+        else if (state == `IDLE && ~hit) begin
+            mem_enable <= 1'b1;
+            inst_addr  <= pc;
+            state      <= `BUSY;
         end
     end
 end
