@@ -80,15 +80,16 @@ assign Vj_value  = res[Qj_check];
 assign ls_commit = ~empty && op[next_head] >= `LB && op[next_head] <= `SW;
 assign ls_rob_id = next_head;
 
-integer i;
+integer i, clk_cnt = 0;
 // integer debug_file;
 // initial begin
 //     debug_file = $fopen("rob_debug.txt");
 // end
 
 always @(posedge clk) begin
+    clk_cnt = clk_cnt + 1;
     if (rst || wrong_commit) begin
-        // $display("ROB reset");
+        // $display("ROB reset, clk: %d", clk_cnt);
         head                <= 0;
         tail                <= 0;
         wrong_commit        <= 0;
@@ -149,6 +150,8 @@ always @(posedge clk) begin
             //     $display("ROB commit, rd: %d", rd[next_head]);
             //     $display("ROB commit, res: %d", res[next_head]);
             // end
+            // $fdisplay(debug_file, "clk: %d", clk_cnt);
+            // $fdisplay(debug_file, "ROB commit, pc: %x, dest: %x", pc[next_head], rd[next_head]);
             if (is_jump[next_head]) begin
                 predictor_update_pc <= pc[next_head];
                 predictor_update    <= now_choice[next_head];

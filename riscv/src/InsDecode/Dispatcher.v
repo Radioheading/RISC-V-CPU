@@ -146,6 +146,10 @@ always @(posedge clk) begin
             //     $display("to rf rs1: ", to_rf_rs1);
             //     $display("real Vi: %d", (alu_valid && alu_rob_id == to_rf_Qi && alu_rob_id) ? alu_res : (lsb_valid && lsb_rob_id == to_rf_Qi && lsb_rob_id) ? lsb_res : Qi_valid ? Vi_value : to_rf_Vi);
             // end
+            // if (if_pc == 4388) begin
+            //     $display("fuck inst: %x", if_inst);
+            //     $display("rd: %d", rd);
+            // end
             to_rf_valid        <= 1;
             to_rf_name         <= rd;
             to_rf_rename       <= rename_rd;

@@ -61,8 +61,9 @@ always @(posedge clk) begin
                 dependency[dispatch_name] = dispatch_rename;
             end
             if (rob_valid && dest) begin
-                // $fdisplay(debug_file, "clk: %d", clk_count);
-                // $fdisplay(debug_file, "RF: %d <= %d", dest, $signed(rob_data));
+                // if (clk_count < 200000) begin
+                //     $fdisplay(debug_file, "RF: %d <= %d", dest, $signed(rob_data));
+                // end
                 register_file[dest] <= rob_data;
                 if (dest_depend == dependency[dest]) begin
                     dependency[dest] <= 0;

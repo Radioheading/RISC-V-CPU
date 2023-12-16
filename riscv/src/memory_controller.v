@@ -128,7 +128,7 @@ always @(posedge clk) begin
                 // $display("store data size: %d", lsb_data_size);
                 // $display("cur_byte: %d", cur_byte);
                 // if (cur_byte == 0) begin
-                //     $fdisplay(debug_file, "clk: %d", clk_count);
+                //     // $fdisplay(debug_file, "clk: %d", clk_count);
                 //     $fdisplay(debug_file, "store address: %d, size: %d, value: %d", addr, lsb_data_size, lsb_data);
                 // end
                 if (cur_byte == lsb_data_size - 1) begin
@@ -194,6 +194,7 @@ always @(posedge clk) begin
                     cur_byte      <= 3'b000;
                     state         <= `STALL; // need 1 cycle for i-cache to know
                     i_cache_valid <= 1'b1;
+                    addr          <= 32'b0;
                 end
 
                 else begin

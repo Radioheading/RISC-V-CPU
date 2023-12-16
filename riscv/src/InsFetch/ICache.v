@@ -30,8 +30,8 @@ reg [31:11] tag   [`CACHE_SIZE - 1:0];
 reg         valid [`CACHE_SIZE - 1:0];
 reg         state;
 wire [10:2] index = pc[10:2];
-assign hit = fetch_enable && (tag[index] == pc[`TAG_RANGE]) && valid[index];
-assign hit_data = data[index];
+assign hit = fetch_enable && (tag[index] == pc[`TAG_RANGE]) && valid[index] || mem_valid && inst_addr == pc;
+assign hit_data = mem_valid && inst_addr == pc ? inst : data[index];
 integer     i;
 
 always @(posedge clk) begin
