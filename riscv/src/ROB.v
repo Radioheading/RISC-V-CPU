@@ -141,7 +141,7 @@ always @(posedge clk) begin
         end
         if (ready[next_head] && ~empty) begin
             head <= next_head;
-            // $display("ROB commit, position: %d", next_head);
+            // $display("$ROB commit, position: %d", next_head);
             // if (rd[next_head] == 13 && ls_commit) begin
             //     $fdisplay(debug_file, "ROB commit, pc: %d", pc[next_head]);
             // end

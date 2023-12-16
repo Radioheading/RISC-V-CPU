@@ -31,7 +31,6 @@ module RF (
 //     debug_file = $fopen("rf_debug.txt");
 // end
 
-// data
 reg [31:0] register_file[31:0];
 reg [4:0]  dependency[31:0];
 
@@ -61,9 +60,7 @@ always @(posedge clk) begin
                 dependency[dispatch_name] = dispatch_rename;
             end
             if (rob_valid && dest) begin
-                // if (clk_count < 200000) begin
-                    // $fdisplay(debug_file, "RF: %d <= %d", dest, $signed(rob_data));
-                // end
+                // $fdisplay(debug_file, "RF: %d <= %d", dest, $signed(rob_data));
                 register_file[dest] <= rob_data;
                 if (dest_depend == dependency[dest]) begin
                     dependency[dest] <= 0;

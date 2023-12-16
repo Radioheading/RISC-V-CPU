@@ -93,7 +93,10 @@ assign to_rf_rs2   = rs2;
 assign Qi_check    = to_rf_Qi;
 assign Qj_check    = to_rf_Qj;
 
+integer clk_cnt = 0;
+
 always @(posedge clk) begin
+    clk_cnt = clk_cnt + 1;
     if (rst || wrong_commit) begin
         // all output port is set to 0
         to_rob_valid       <= 0;
@@ -131,24 +134,12 @@ always @(posedge clk) begin
         to_lsb_valid       <= 0;
         to_rs_valid        <= 0;
         if (if_valid && ~part_full) begin
-            // if (Qi) begin
-            //     $display("has dependency on Qi😅");
-            // end
-            // if (Qj) begin
-            //     $display("has dependency on Qj😅");
-            // end
-            // if (rename_rd == 3) begin
-            //     $display("dispatch Qi: %d, dispatch Qj: %d", Qi, Qj);
-            //     $display("dispatch Vi: %d, dispatch Vj: %d", Vi, Vj);
-            //     $display("Qi valid: %d, Qj valid: %d", Qi_valid, Qj_valid);
-            //     $display("alu has result: %d", (alu_valid && alu_rob_id == to_rf_Qi && alu_rob_id));
-            //     $display("lsb has result: %d", (lsb_valid && lsb_rob_id == to_rf_Qj && lsb_rob_id));
-            //     $display("to rf rs1: ", to_rf_rs1);
-            //     $display("real Vi: %d", (alu_valid && alu_rob_id == to_rf_Qi && alu_rob_id) ? alu_res : (lsb_valid && lsb_rob_id == to_rf_Qi && lsb_rob_id) ? lsb_res : Qi_valid ? Vi_value : to_rf_Vi);
-            // end
-            // if (if_pc == 4388) begin
-            //     $display("fuck inst: %x", if_inst);
-            //     $display("rd: %d", rd);
+            // if (rename_rd == 22) begin
+            //     $display("clk: %d", clk_cnt);
+            //     $display("inst: if_inst: %x", if_inst);
+            //     $display("inst: if_pc: %x", if_pc);
+            //     $display("Qi: %d, Qj: %d", Qi, Qj);
+            //     $display("Vi: %d, Vj: %d", Vi, Vj);
             // end
             to_rf_valid        <= 1;
             to_rf_name         <= rd;

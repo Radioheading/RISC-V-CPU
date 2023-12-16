@@ -37,8 +37,8 @@ module ReservationStation (
     output wire       rs_full
 );
 
-wire [5:0]  first_empty;
-wire [5:0]  first_ready;
+wire [4:0]  first_empty;
+wire [4:0]  first_ready;
 wire [4:0]  Qi_in = (alu_valid && alu_rob_id == dispatch_Qi) ? 0 : (lsb_valid && lsb_rob_id == dispatch_Qi) ? 0 : dispatch_Qi;
 wire [4:0]  Qj_in = (alu_valid && alu_rob_id == dispatch_Qj) ? 0 : (lsb_valid && lsb_rob_id == dispatch_Qj) ? 0 : dispatch_Qj;
 wire [31:0] Vi_in = (alu_valid && alu_rob_id == dispatch_Qi) ? alu_res : (lsb_valid && lsb_rob_id == dispatch_Qi) ? lsb_res : dispatch_Vi;
@@ -62,11 +62,7 @@ reg [6:0]  op[`RS_ARR];
 assign first_empty = (busy[0] == 0) ? 0 : (busy[1] == 0) ? 1 : (busy[2] == 0) ? 2 : (busy[3] == 0) ? 3 : 
                      (busy[4] == 0) ? 4 : (busy[5] == 0) ? 5 : (busy[6] == 0) ? 6 : (busy[7] == 0) ? 7 : 
                      (busy[8] == 0) ? 8 : (busy[9] == 0) ? 9 : (busy[10] == 0) ? 10 : (busy[11] == 0) ? 11 : 
-                     (busy[12] == 0) ? 12 : (busy[13] == 0) ? 13 : (busy[14] == 0) ? 14 : (busy[15] == 0) ? 15 : 
-                     (busy[16] == 0) ? 16 : (busy[17] == 0) ? 17 : (busy[18] == 0) ? 18 : (busy[19] == 0) ? 19 : 
-                     (busy[20] == 0) ? 20 : (busy[21] == 0) ? 21 : (busy[22] == 0) ? 22 : (busy[23] == 0) ? 23 : 
-                     (busy[24] == 0) ? 24 : (busy[25] == 0) ? 25 : (busy[26] == 0) ? 26 : (busy[27] == 0) ? 27 : 
-                     (busy[28] == 0) ? 28 : (busy[29] == 0) ? 29 : (busy[30] == 0) ? 30 : (busy[31] == 0) ? 31 : 32;
+                     (busy[12] == 0) ? 12 : (busy[13] == 0) ? 13 : (busy[14] == 0) ? 14 : (busy[15] == 0) ? 15 : 16;
 
 
 assign first_ready = (busy[0] == 1 && Qi[0] == 0 && Qj[0] == 0) ? 0 : (busy[1] == 1 && Qi[1] == 0 && Qj[1] == 0) ? 1 : 
@@ -76,15 +72,7 @@ assign first_ready = (busy[0] == 1 && Qi[0] == 0 && Qj[0] == 0) ? 0 : (busy[1] =
                      (busy[8] == 1 && Qi[8] == 0 && Qj[8] == 0) ? 8 : (busy[9] == 1 && Qi[9] == 0 && Qj[9] == 0) ? 9 :
                      (busy[10] == 1 && Qi[10] == 0 && Qj[10] == 0) ? 10 : (busy[11] == 1 && Qi[11] == 0 && Qj[11] == 0) ? 11 :
                      (busy[12] == 1 && Qi[12] == 0 && Qj[12] == 0) ? 12 : (busy[13] == 1 && Qi[13] == 0 && Qj[13] == 0) ? 13 :
-                     (busy[14] == 1 && Qi[14] == 0 && Qj[14] == 0) ? 14 : (busy[15] == 1 && Qi[15] == 0 && Qj[15] == 0) ? 15 :
-                     (busy[16] == 1 && Qi[16] == 0 && Qj[16] == 0) ? 16 : (busy[17] == 1 && Qi[17] == 0 && Qj[17] == 0) ? 17 :
-                     (busy[18] == 1 && Qi[18] == 0 && Qj[18] == 0) ? 18 : (busy[19] == 1 && Qi[19] == 0 && Qj[19] == 0) ? 19 :
-                     (busy[20] == 1 && Qi[20] == 0 && Qj[20] == 0) ? 20 : (busy[21] == 1 && Qi[21] == 0 && Qj[21] == 0) ? 21 :
-                     (busy[22] == 1 && Qi[22] == 0 && Qj[22] == 0) ? 22 : (busy[23] == 1 && Qi[23] == 0 && Qj[23] == 0) ? 23 :
-                     (busy[24] == 1 && Qi[24] == 0 && Qj[24] == 0) ? 24 : (busy[25] == 1 && Qi[25] == 0 && Qj[25] == 0) ? 25 :
-                     (busy[26] == 1 && Qi[26] == 0 && Qj[26] == 0) ? 26 : (busy[27] == 1 && Qi[27] == 0 && Qj[27] == 0) ? 27 :
-                     (busy[28] == 1 && Qi[28] == 0 && Qj[28] == 0) ? 28 : (busy[29] == 1 && Qi[29] == 0 && Qj[29] == 0) ? 29 :
-                     (busy[30] == 1 && Qi[30] == 0 && Qj[30] == 0) ? 30 : (busy[31] == 1 && Qi[31] == 0 && Qj[31] == 0) ? 31 : 32;
+                     (busy[14] == 1 && Qi[14] == 0 && Qj[14] == 0) ? 14 : (busy[15] == 1 && Qi[15] == 0 && Qj[15] == 0) ? 15 : 16;
 
 assign rs_full = (first_empty == `RS_SIZE);
 

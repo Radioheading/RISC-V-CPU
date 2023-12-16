@@ -52,6 +52,9 @@ always @(posedge clk) begin
     clk_count = clk_count + 1;
     // $display("MemController clk_count = %d", clk_count);
     // $display("MemController state = %d", state);
+    // if (clk_count % 100000 == 0) begin
+    //     $display("MemController clk_count = %d", clk_count);
+    // end
     if (op == `LW) begin
         lsb_data_size <= 3'b100;
     end
@@ -127,8 +130,8 @@ always @(posedge clk) begin
                 // $display("MemController: STORE");
                 // $display("store data size: %d", lsb_data_size);
                 // $display("cur_byte: %d", cur_byte);
-                // if (cur_byte == 0) begin
-                //     // $fdisplay(debug_file, "clk: %d", clk_count);
+                // if (cur_byte == 0 && addr == 196608) begin
+                //     $fdisplay(debug_file, "clk: %d", clk_count);
                 //     $fdisplay(debug_file, "store address: %d, size: %d, value: %d", addr, lsb_data_size, lsb_data);
                 // end
                 if (cur_byte == lsb_data_size - 1) begin

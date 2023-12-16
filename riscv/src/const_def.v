@@ -1,14 +1,14 @@
 // const for RISC-V instructions
 
 // RS-related
-`define RS_SIZE       32
-`define RS_RANGE      4:0
-`define RS_ARR        31:0
+`define RS_SIZE       16
+`define RS_RANGE      3:0
+`define RS_ARR        15:0
 
 // LSB-related
-`define LSB_SIZE      32
-`define LSB_RANGE     4:0
-`define LSB_ARR       31:0
+`define LSB_SIZE      16
+`define LSB_RANGE     3:0
+`define LSB_ARR       15:0
 
 // ROB-related
 `define ROB_SIZE      32

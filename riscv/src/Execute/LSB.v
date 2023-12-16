@@ -139,7 +139,7 @@ always @(posedge clk) begin
         case (state)
         `IDLE: begin
             lsb_valid <= 0;
-            if (full == 0 && Qi[next_head] == 0 && Qj[next_head] == 0 && rob_valid && rd[next_head] == rob_commit_id) begin
+            if (empty == 0 && Qi[next_head] == 0 && Qj[next_head] == 0 && rob_valid && rd[next_head] == rob_commit_id) begin
                 // $display("LSB: going to load or store");                
                 // access memory
                 head <= next_head;
