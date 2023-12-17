@@ -34,7 +34,7 @@
 `define AUIPC_type    7'b0010111
 
 `define    NULL     6'd0
-`define    LUI      6'd1        //Load From Immediate
+`define    LUI      6'd1        //Load From Immediate (by copilot)
 `define    AUIPC    6'd2        //Add Upper Immediate to PC
 `define    JAL      6'd3        //Jump & Link
 `define    JALR     6'd4        //Jump & Link Register
