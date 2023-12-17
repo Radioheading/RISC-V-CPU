@@ -39,11 +39,16 @@ assign     predict_pc   = pc;
 assign     predict_inst = cache_inst; 
 
 integer clk_count = 0;
+// integer debug_file;
+
+// initial begin
+//     debug_file = $fopen("ins_fetch_debug.txt");
+// end
 
 always @(posedge clk) begin
     clk_count = clk_count + 1;
-    // $display("InsFetch clk: %d", clk_count);
-    // $display("InsFetch pc: %x", pc);
+    // $fdisplay(debug_file, "InsFetch clk: %d", clk_count);
+    // $fdisplay(debug_file, "InsFetch pc: %x", pc);
     if (rst) begin
         // reset output to false/zero
         if_jump         <= 1'b0;
@@ -63,6 +68,7 @@ always @(posedge clk) begin
         cache_pc     <= 1'b0;
         if_valid     <= 1'b0;
         state        <= `IDLE;
+        // $fdisplay(debug_file, "pc: %x, clk: %d, (reset)", reset_pc, clk_count);
     end
     else begin
         if (state == `IDLE) begin
@@ -90,6 +96,7 @@ always @(posedge clk) begin
                 //     $display("InsFetcher: clk = %d", clk_count);
                 //     $display("Fuck Instruction: %x", cache_inst);
                 // end
+                // $fdisplay(debug_file, "pc: %x, clk: %d", pc, clk_count);
                 if (cache_inst[6:0] == `JAL_type) begin
                     pc      <= pc + {{20{cache_inst[31]}}, cache_inst[19:12], cache_inst[20], cache_inst[30:21], 1'b0};
                     if_jump <= 1'b1;

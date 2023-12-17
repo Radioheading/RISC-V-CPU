@@ -58,7 +58,7 @@ wire [`ROB_RANGE] next_head, next_tail;
 assign next_head = head + 1 == `ROB_SIZE ? 1 : head + 1;
 assign next_tail = tail + 1 == `ROB_SIZE ? 1 : tail + 1;
 assign empty = (head == tail);
-assign full = (next_tail == head);
+assign full = (next_tail == head) || (head == 0 && next_tail == `ROB_SIZE - 1);
 assign rob_full = full;
 
 // data of reorder buffer
@@ -145,11 +145,11 @@ always @(posedge clk) begin
             // if (rd[next_head] == 13 && ls_commit) begin
             //     $fdisplay(debug_file, "ROB commit, pc: %d", pc[next_head]);
             // end
-            // if (res[next_head] == -2 && rd[next_head] == 8) begin
-            //     $display("ROB commit, pc: %x", pc[next_head]);
-            //     $display("ROB commit, rd: %d", rd[next_head]);
-            //     $display("ROB commit, res: %d", res[next_head]);
-            // end
+                // $display("head: %d, tail: %d", head, tail);
+                // $display("ROB commit, clk: %d", clk_cnt);
+                // $display("ROB commit, pc: %x", pc[next_head]);
+                // $display("ROB commit, rd: %d", rd[next_head]);
+                // $display("ROB commit, res: %d", res[next_head]);
             // $fdisplay(debug_file, "clk: %d", clk_cnt);
             // $fdisplay(debug_file, "ROB commit, pc: %x, dest: %x", pc[next_head], rd[next_head]);
             if (is_jump[next_head]) begin
@@ -163,6 +163,7 @@ always @(posedge clk) begin
             // $display("prev_choice: %d", prev_choice[next_head]);
             // $display("now_choice: %d", now_choice[next_head]);
             if (prev_choice[next_head] != now_choice[next_head]) begin
+                // $display("wrong commit, true pc: %x", now_choice[next_head] ? jump_pc[next_head] : pc[next_head]);
                 wrong_commit <= 1;
                 true_pc      <= now_choice[next_head] ? jump_pc[next_head] : pc[next_head];
             end
