@@ -6,3 +6,5 @@ riscv/testspace/*
 !.keep
 
 riscv/testspace/*
+
+.vscode
