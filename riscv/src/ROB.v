@@ -32,8 +32,6 @@ module ReOrderBuffer (
     input wire  [4:0]  dispatch_rd,
     input wire  [6:0]  dispatch_op,
     input wire         dispatch_jump_choice,
-    input wire  [4:0]  dispatch_Qi,
-    input wire  [4:0]  dispatch_Qj,
     input wire         dispatch_is_jump,
 
     input wire  [4:0]  Qi_check,
@@ -87,7 +85,6 @@ integer i, clk_cnt = 0;
 // end
 
 always @(posedge clk) begin
-    clk_cnt = clk_cnt + 1;
     if (rst || wrong_commit) begin
         // $display("ROB reset, clk: %d", clk_cnt);
         head                <= 0;

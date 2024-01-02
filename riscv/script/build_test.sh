@@ -1,12 +1,12 @@
 #!/bin/sh
 set -e
-prefix='/opt/riscv'
+prefix='/mnt/d/Program/origin/WeChat Files/WeChat Files/wxid_4smw5s9v09p322/FileStorage/File/2024-01/toolchain/riscv'
 rpath=$prefix/bin/
 # clearing test dir
 rm -rf ./test
 mkdir ./test
 # compiling rom
-${rpath}riscv32-unknown-elf-as -o ./sys/rom.o -march=rv32i ./sys/rom.s
+"${rpath}riscv32-unknown-elf-as" -o ./sys/rom.o -march=rv32i ./sys/rom.s
 # compiling testcase
 cp ./testcase/${1%.*}.c ./test/test.c
 ${rpath}riscv32-unknown-elf-gcc -o ./test/test.o -I ./sys -c ./test/test.c -O2 -march=rv32i -mabi=ilp32 -Wall
