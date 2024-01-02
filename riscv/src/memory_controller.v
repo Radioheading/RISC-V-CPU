@@ -7,6 +7,8 @@
 `define FETCH   3'b010
 `define LOAD    3'b011
 `define STORE   3'b100
+`define L_STALL 3'b101
+`define S_STALL 3'b110
 
 module MemController (
     input wire clk,

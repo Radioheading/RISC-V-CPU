@@ -46,6 +46,7 @@ integer clk_count = 0;
 // end
 
 always @(posedge clk) begin
+    clk_count = clk_count + 1;
     // $fdisplay(debug_file, "InsFetch clk: %d", clk_count);
     // $fdisplay(debug_file, "InsFetch pc: %x", pc);
     if (rst) begin

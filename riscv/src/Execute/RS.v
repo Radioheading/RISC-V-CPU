@@ -80,7 +80,7 @@ integer i, clk_count = 0;
 
 always @(posedge clk) begin
     // $display("RS clk: %d", clk_count);
-    // clk_count = clk_count + 1;
+    clk_count = clk_count + 1;
     if (rst || wrong_commit) begin
         for (i = 0; i < `RS_SIZE; i = i + 1) begin
             busy[i] <= 0;

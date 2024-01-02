@@ -2,7 +2,7 @@
 
 int main(){
 	int i = 0;
-	for ( ; i < 0x1ff; i++) {
+	for ( ; i < 114514; i++) {
 		outb('a');
 		outb('b');
 		outb('c');

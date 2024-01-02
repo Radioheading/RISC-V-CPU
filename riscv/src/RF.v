@@ -63,7 +63,12 @@ always @(posedge clk) begin
                 // $fdisplay(debug_file, "RF: %d <= %d", dest, $signed(rob_data));
                 register_file[dest] <= rob_data;
                 if (dest_depend == dependency[dest]) begin
-                    dependency[dest] <= 0;
+                    if (dispatch_enable && dispatch_name == dest) begin
+                    // corner case: dispatch_name == dest
+                    end
+                    else begin
+                        dependency[dest] <= 0;
+                    end
                 end
             end
         end

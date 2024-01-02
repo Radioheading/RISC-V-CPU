@@ -1,31 +1,44 @@
 #include "io.h"
-int f[2801];
-int main() {
-	int a = 10000;
-	int b = 0;
-	int c = 2800;
-	int d = 0;
-	int e = 0;
-	int g = 0;
+#define putchar outb
+float f(float x, float y, float z) {
+    float a = x * x + 9.0f / 4.0f * y * y + z * z - 1;
+    return a * a * a - x * x * z * z * z - 9.0f / 80.0f * y * y * z * z * z;
+}
 
-	for (;b-c!=0;) 
-		f[b++] = a/5;
-	for (;; e = d%a){
-		d = 0;
-		g = c*2;
-		if (g==0) break;
-		
-		for (b=c;;d=d*b){
-			d=d+f[b]*a;
-			f[b] = d%--g;
-			d=d/g--;
-			if (--b==0) break;
-		}
-		
-		c = c-14;
-		outl(e+d/a); // should be printf("%04b"), but let it be
-	}
-	
-  print("\n");
-  return 0;
+float h(float x, float z) {
+    for (float y = 1.0f; y >= 0.0f; y -= 0.001f)
+        if (f(x, y, z) <= 0.0f)
+            return y;
+    return 0.0f;
+}
+
+float mysqrt(float x) {
+  if (x == 0) return 0;
+  int i;
+  double v = x / 2;
+  for (i = 0; i < 50; ++i)
+    v = (v + x / v)/2;
+  
+  return v;
+}
+
+int main() {
+    for (float z = 1.5f; z > -1.5f; z -= 0.05f) {
+        for (float x = -1.5f; x < 1.5f; x += 0.025f) {
+            float v = f(x, 0.0f, z);
+            if (v <= 0.0f) {
+                float y0 = h(x, z);
+                float ny = 0.01f;
+                float nx = h(x + ny, z) - y0;
+                float nz = h(x, z + ny) - y0;
+                float nd = 1.0f / mysqrt(nx * nx + ny * ny + nz * nz);
+                float d = (nx + ny - nz) * nd * 0.5f + 0.5f;
+                int index = (int)(d * 5.0f);
+                putchar(".:-=+*#%@"[index]);
+            }
+            else
+                putchar('_');
+        }
+        putchar('\n');
+    }
 }

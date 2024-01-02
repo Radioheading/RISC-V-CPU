@@ -1,6 +1,5 @@
 #include "io.h"
 #define putchar outb
-float f(float x, float y, float z) {
     float a = x * x + 9.0f / 4.0f * y * y + z * z - 1;
     return a * a * a - x * x * z * z * z - 9.0f / 80.0f * y * y * z * z * z;
 }

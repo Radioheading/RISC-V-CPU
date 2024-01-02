@@ -28,6 +28,8 @@ module Dispatcher (
     output reg        to_rob_valid,
     output reg [31:0] to_rob_imm,
     output reg [31:0] to_rob_pc,
+    output reg [4:0]  to_rob_Qi,
+    output reg [4:0]  to_rob_Qj,
     output reg [4:0]  to_rob_rd,
     output reg [6:0]  to_rob_op,
     output reg        to_rob_jump_choice,
@@ -47,6 +49,7 @@ module Dispatcher (
     input wire        lsb_full,
     output reg        to_lsb_valid,
     output reg [31:0] to_lsb_imm,
+    output reg [31:0] to_lsb_pc,
     output reg [4:0]  to_lsb_Qi,
     output reg [4:0]  to_lsb_Qj,
     output reg [4:0]  to_lsb_rd,
@@ -99,6 +102,8 @@ always @(posedge clk) begin
         to_rob_valid       <= 0;
         to_rob_imm         <= 0;
         to_rob_pc          <= 0;
+        to_rob_Qi          <= 0;
+        to_rob_Qj          <= 0;
         to_rob_rd          <= 0;
         to_rob_op          <= 0;
         to_rob_jump_choice <= 0;
@@ -114,6 +119,7 @@ always @(posedge clk) begin
         to_rs_Vj           <= 0;
         to_lsb_valid       <= 0;
         to_lsb_imm         <= 0;
+        to_lsb_pc          <= 0;
         to_lsb_Qi          <= 0;
         to_lsb_Qj          <= 0;
         to_lsb_rd          <= 0;
@@ -141,6 +147,8 @@ always @(posedge clk) begin
             to_rob_valid       <= 1;
             to_rob_imm         <= imm;
             to_rob_pc          <= if_pc;
+            to_rob_Qi          <= Qi;
+            to_rob_Qj          <= Qj;
             to_rob_rd          <= rd;
             to_rob_op          <= op;
             to_rob_jump_choice <= if_jump;
@@ -148,6 +156,7 @@ always @(posedge clk) begin
             if (is_ls) begin
                 to_lsb_valid       <= 1;
                 to_lsb_imm         <= imm;
+                to_lsb_pc          <= if_pc;
                 to_lsb_Qi          <= Qi;
                 to_lsb_Qj          <= Qj;
                 to_lsb_rd          <= rename_rd;

@@ -30,6 +30,7 @@ module LoadStoreBuffer (
     // port with dispatcher
     input wire        dispatch_valid,
     input wire [31:0] dispatch_imm,
+    input wire [31:0] dispatch_pc,
     input wire [4:0]  dispatch_Qi,
     input wire [4:0]  dispatch_Qj,
     input wire [4:0]  dispatch_rd,
@@ -76,7 +77,7 @@ integer clk_count = 0;
 // end
 
 always @(posedge clk) begin
-    // clk_count = clk_count + 1;
+    clk_count = clk_count + 1;
     if (rst || wrong_commit) begin
         state <= `IDLE;
         head  <= 0;
