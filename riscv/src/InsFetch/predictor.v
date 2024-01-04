@@ -23,7 +23,7 @@ module Predictor (
 
 reg [1:0] judger[127:0];
 
-assign predict_res = if_pc[6:0] == `B_type ? judger[if_pc[8:2]][1] : 1'b0;
+assign predict_res = if_inst[6:0] == `B_type ? judger[if_pc[8:2]][1] : 1'b0;
 assign predict_pc  = predict_res ? if_pc + {{20{if_inst[31]}}, if_inst[7], if_inst[30:25], if_inst[11:8], 1'b0} : if_pc + 4;
 
 integer i;
@@ -36,7 +36,7 @@ always @(posedge clk) begin
     end
     if (rdy) begin
         if (ROB_valid) begin
-            if (~real_result) begin
+            if (real_result) begin
                 if (judger[commit_pc[8:2]] < 2'b11) judger[commit_pc[8:2]] <= judger[commit_pc[8:2]] + 1;
             end
             else begin

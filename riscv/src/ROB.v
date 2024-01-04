@@ -32,8 +32,6 @@ module ReOrderBuffer (
     input wire  [4:0]  dispatch_rd,
     input wire  [6:0]  dispatch_op,
     input wire         dispatch_jump_choice,
-    input wire  [4:0]  dispatch_Qi,
-    input wire  [4:0]  dispatch_Qj,
     input wire         dispatch_is_jump,
 
     input wire  [4:0]  Qi_check,
@@ -54,6 +52,8 @@ module ReOrderBuffer (
 wire             empty, full;
 reg [`ROB_RANGE] head, tail;
 wire [`ROB_RANGE] next_head, next_tail;
+reg [31:0]       predict_num   = 0;
+reg [31:0]       predict_wrong = 0;
 
 assign next_head = head + 1 == `ROB_SIZE ? 1 : head + 1;
 assign next_tail = tail + 1 == `ROB_SIZE ? 1 : tail + 1;
@@ -87,7 +87,6 @@ integer i, clk_cnt = 0;
 // end
 
 always @(posedge clk) begin
-    clk_cnt = clk_cnt + 1;
     if (rst || wrong_commit) begin
         // $display("ROB reset, clk: %d", clk_cnt);
         head                <= 0;
@@ -156,6 +155,7 @@ always @(posedge clk) begin
                 predictor_update_pc <= pc[next_head];
                 predictor_update    <= now_choice[next_head];
                 predictor_enable    <= 1;
+                predict_num         <= predict_num + 1;
             end
             else begin
                 predictor_enable    <= 0;
@@ -166,6 +166,8 @@ always @(posedge clk) begin
                 // $display("wrong commit, true pc: %x", now_choice[next_head] ? jump_pc[next_head] : pc[next_head]);
                 wrong_commit <= 1;
                 true_pc      <= now_choice[next_head] ? jump_pc[next_head] : pc[next_head];
+                predict_wrong <= predict_wrong + 1;
+                // $display("predict wrong: %d, predict num: %d", predict_wrong, predict_num);
             end
 
             commit_valid      <= 1;

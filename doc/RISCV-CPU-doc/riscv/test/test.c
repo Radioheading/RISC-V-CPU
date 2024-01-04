@@ -1,44 +1,50 @@
 #include "io.h"
-#define putchar outb
-float f(float x, float y, float z) {
-    float a = x * x + 9.0f / 4.0f * y * y + z * z - 1;
-    return a * a * a - x * x * z * z * z - 9.0f / 80.0f * y * y * z * z * z;
-}
+//考察点：section 8 语句，包括if,while,for,break,continue,return等
+//算法：线性筛法求欧拉函数
+//样例输入：10
+//样例输出：
+//1
+//2
+//2
+//4
+//2
+//6
+//4
+//6
+//4
 
-float h(float x, float z) {
-    for (float y = 1.0f; y >= 0.0f; y -= 0.001f)
-        if (f(x, y, z) <= 0.0f)
-            return y;
-    return 0.0f;
-}
-
-float mysqrt(float x) {
-  if (x == 0) return 0;
-  int i;
-  double v = x / 2;
-  for (i = 0; i < 50; ++i)
-    v = (v + x / v)/2;
-  
-  return v;
-}
+int N;
+int M = 0;
+int check[20];
 
 int main() {
-    for (float z = 1.5f; z > -1.5f; z -= 0.05f) {
-        for (float x = -1.5f; x < 1.5f; x += 0.025f) {
-            float v = f(x, 0.0f, z);
-            if (v <= 0.0f) {
-                float y0 = h(x, z);
-                float ny = 0.01f;
-                float nx = h(x + ny, z) - y0;
-                float nz = h(x, z + ny) - y0;
-                float nd = 1.0f / mysqrt(nx * nx + ny * ny + nz * nz);
-                float d = (nx + ny - nz) * nd * 0.5f + 0.5f;
-                int index = (int)(d * 5.0f);
-                putchar(".:-=+*#%@"[index]);
-            }
-            else
-                putchar('_');
-        }
-        putchar('\n');
-    }
+    N = inl();
+	int i = 0;
+	while ( i <= N ) check[i++] = 1;
+	int phi[15];
+	int P[15];
+	phi[1] = 1;
+	for (i = 2; ; ++i ) {
+		if ( i > N ) break;
+		if ( check[i] ) {
+			P[++M] = i;
+			phi[i] = i - 1;
+		}
+		int k = i;
+		int i;
+		for (i = 1; i <= M && (k * P[i] <= N); i++) {
+			int tmp = k * P[i];
+			if ( tmp > N ) continue;
+			check[tmp] = 0;
+			if ( k % P[i] == 0) {
+				phi[tmp] = phi[k] * P[i];
+				break;
+			}
+			else {
+				phi[k * P[i]] = phi[k] * (P[i] - 1);
+			}
+		}
+		outlln(phi[k]);
+	}
+    return 0;
 }

@@ -103,8 +103,6 @@ wire [4:0]  rob_Qj_check;
 wire        to_rob_valid;
 wire [31:0] to_rob_imm;
 wire [31:0] to_rob_pc;
-wire [4:0]  to_rob_Qi;
-wire [4:0]  to_rob_Qj;
 wire [4:0]  to_rob_rd;
 wire [6:0]  to_rob_op;
 wire        to_rob_jump_choice;
@@ -126,7 +124,6 @@ wire [31:0] to_rs_Vj;
 wire        lsb_full;
 wire        to_lsb_valid;
 wire [31:0] to_lsb_imm;
-wire [31:0] to_lsb_pc;
 wire [4:0]  to_lsb_Qi;
 wire [4:0]  to_lsb_Qj;
 wire [4:0]  to_lsb_rd;
@@ -168,7 +165,7 @@ MemController mem_controller(
   .rst(rst_in),
   .rdy(rdy_in),
   .byte_in(mem_din),
-  .io_buffer_full(io_buffer_full),
+  .io_buffer_full(1'b0),
   .lw_type(mem_wr),
   .addr(mem_a),
   .byte_out(mem_dout),
@@ -268,8 +265,6 @@ Dispatcher dispatcher(
   .to_rob_valid(to_rob_valid),
   .to_rob_imm(to_rob_imm),
   .to_rob_pc(to_rob_pc),
-  .to_rob_Qi(to_rob_Qi),
-  .to_rob_Qj(to_rob_Qj),
   .to_rob_rd(to_rob_rd),
   .to_rob_op(to_rob_op),
   .to_rob_jump_choice(to_rob_jump_choice),
@@ -287,7 +282,6 @@ Dispatcher dispatcher(
   .lsb_full(lsb_full),
   .to_lsb_valid(to_lsb_valid),
   .to_lsb_imm(to_lsb_imm),
-  .to_lsb_pc(to_lsb_pc),
   .to_lsb_Qi(to_lsb_Qi),
   .to_lsb_Qj(to_lsb_Qj),
   .to_lsb_rd(to_lsb_rd),
@@ -342,8 +336,6 @@ ReOrderBuffer reorder_buffer (
   .dispatch_op(to_rob_op),
   .dispatch_jump_choice(to_rob_jump_choice),
   .dispatch_is_jump(to_rob_is_jump),
-  .dispatch_Qi(to_rob_Qi),
-  .dispatch_Qj(to_rob_Qj),
   .Qi_check(rob_Qi_check),
   .Qj_check(rob_Qj_check),
   .rename_rd(rob_rename_rd),
@@ -419,7 +411,6 @@ LoadStoreBuffer load_store_buffer (
   .load_store_op(lsb_op),
   .dispatch_valid(to_lsb_valid),
   .dispatch_imm(to_lsb_imm),
-  .dispatch_pc(to_lsb_pc),
   .dispatch_Qi(to_lsb_Qi),
   .dispatch_Qj(to_lsb_Qj),
   .dispatch_rd(to_lsb_rd),

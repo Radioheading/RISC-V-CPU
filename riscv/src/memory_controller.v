@@ -7,8 +7,6 @@
 `define FETCH   3'b010
 `define LOAD    3'b011
 `define STORE   3'b100
-`define L_STALL 3'b101
-`define S_STALL 3'b110
 
 module MemController (
     input wire clk,
@@ -41,7 +39,6 @@ module MemController (
 reg [2:0] state;
 reg [2:0] lsb_data_size;
 reg [2:0] cur_byte;
-reg       stall_time; // load or store: 2, fetch: 1
 
 integer clk_count = 0;
 // integer debug_file;
@@ -92,7 +89,6 @@ always @(posedge clk) begin
                 lsb_valid     <= 1'b0;
                 if (lsb_enable) begin
                     cur_byte   <= 3'b000;
-                    stall_time <= 1;
                     if (lsb_r_or_w) begin
                         // $display("MemController: going to load");
                         // read
@@ -119,7 +115,6 @@ always @(posedge clk) begin
                     end
                 end
                 else if (fetch_enable) begin
-                    stall_time <= 0;
                     cur_byte   <= 3'b000;
                     lw_type    <= 1'b0;
                     byte_out   <= 32'b0;
