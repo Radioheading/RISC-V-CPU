@@ -165,7 +165,7 @@ MemController mem_controller(
   .rst(rst_in),
   .rdy(rdy_in),
   .byte_in(mem_din),
-  .io_buffer_full(1'b0),
+  .io_buffer_full(io_buffer_full),
   .lw_type(mem_wr),
   .addr(mem_a),
   .byte_out(mem_dout),

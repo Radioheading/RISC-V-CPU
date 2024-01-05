@@ -41,7 +41,7 @@ reg [2:0] lsb_data_size;
 reg [2:0] cur_byte;
 
 integer clk_count = 0;
-// integer debug_file;
+integer debug_file;
 // initial begin
 //     debug_file = $fopen("memory_debug.txt");
 // end
@@ -100,18 +100,10 @@ always @(posedge clk) begin
                     else begin
                         // write
                         // $display("MemController: going to store");
-                        if (~io_buffer_full || lsb_addr != 196608 && lsb_addr != 196612) begin
-                            lw_type    <= 1'b1;
-                            byte_out   <= lsb_data[7:0];
-                            addr       <= lsb_addr;
-                            state      <= `STORE;
-                        end
-                        else begin
-                            lw_type    <= 1'b0;
-                            byte_out   <= 32'b0;
-                            addr       <= 32'b0;
-                            state      <= `IDLE;
-                        end
+                        lw_type    <= 1'b0;
+                        byte_out   <= 32'b0;
+                        addr       <= 32'b0;
+                        state      <= `STORE;
                     end
                 end
                 else if (fetch_enable) begin
@@ -130,6 +122,7 @@ always @(posedge clk) begin
                 end
             end
             else if (state == `STORE && (~io_buffer_full || addr != 196608 && addr != 196612)) begin
+                lw_type <= 1'b1;
                 // $display("MemController: STORE");
                 // $display("store data size: %d", lsb_data_size);
                 // $display("cur_byte: %d", cur_byte);
@@ -137,7 +130,9 @@ always @(posedge clk) begin
                 //     $fdisplay(debug_file, "clk: %d", clk_count);
                 //     $fdisplay(debug_file, "store address: %d, size: %d, value: %d", addr, lsb_data_size, lsb_data);
                 // end
-                if (cur_byte == lsb_data_size - 1) begin
+                // $display("lsb_data_size: %d", lsb_data_size);
+                if (cur_byte == lsb_data_size) begin
+                    // $display("fuck!");
                     cur_byte   <= 3'b000;
                     state      <= `STALL;
                     lsb_valid  <= 1'b1;
@@ -145,13 +140,15 @@ always @(posedge clk) begin
                     addr       <= 32'b0;
                 end
                 else begin 
+                    // $display("cur_byte: %d", cur_byte);
                     case (cur_byte)
-                        3'b000: byte_out <= lsb_data[15:8];
-                        3'b001: byte_out <= lsb_data[23:16];
-                        3'b010: byte_out <= lsb_data[31:24];
+                        3'b000: byte_out <= lsb_data[7:0];
+                        3'b001: byte_out <= lsb_data[15:8];
+                        3'b010: byte_out <= lsb_data[23:16];
+                        3'b011: byte_out <= lsb_data[31:24];
                     endcase
                     cur_byte   <= cur_byte + 1;
-                    addr       <= addr + 1;
+                    addr       <= cur_byte == 0 ? lsb_addr : addr + 1;
                 end
             end
             else if (state == `LOAD) begin

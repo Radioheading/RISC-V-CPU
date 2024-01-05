@@ -22,6 +22,14 @@ reg rst_delay;
 
 wire clk;
 
+wire locked;
+// clk_wiz_7 NEW_CLOCK(
+// 	.reset(btnC),
+// 	.clk_in1(EXCLK),
+// 	.clk_out1(clk),
+// 	.locked(locked)
+// );
+
 // assign EXCLK (or your own clock module) to clk
 assign clk = EXCLK;
 
