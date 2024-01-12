@@ -5,6 +5,6 @@ riscv/testspace/*
 
 !.keep
 
-riscv/testspace/*
+testspace/*
 
 .vscode
